@@ -99,7 +99,7 @@ export default function App() {
         status: 'submitted',
         is_shared: true,
         original_submission: {
-          details: `Casting Diagnostic Assistant report\\n\\n${JSON.stringify(castingCase, null, 2)}`,
+          details: `Casting Diagnostic Assistant report\n\n${JSON.stringify(castingCase, null, 2)}`,
           submitted_at_client: submittedAt,
           submitted_from: 'Casting Diagnostic Assistant',
           casting_case: castingCase
