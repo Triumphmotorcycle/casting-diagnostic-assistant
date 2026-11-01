@@ -1,6 +1,6 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
-import { AlertCircle, Archive, CheckCircle2, ClipboardList, LogIn, LogOut, Plus, RefreshCw, Save, Search, Send, ShieldCheck } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ClipboardList, LogIn, LogOut, Plus, RefreshCw, Save, Search, Send } from 'lucide-react';
 import { CastingCase } from '@/types/casting';
 import { CaseStatus, RegisterCase, emptyCase, saveCase } from '@/lib/caseStore';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
@@ -38,9 +38,6 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [reviewerNotes, setReviewerNotes] = useState('');
-  const [correctiveAction, setCorrectiveAction] = useState('');
-  const [verificationResult, setVerificationResult] = useState('');
 
   const refreshCases = useCallback(async () => {
     if (!supabase) return;
@@ -73,7 +70,6 @@ export default function App() {
   const update = (patch: Partial<CastingCase>) => setCastingCase((prev) => ({ ...prev, ...patch }));
   const beginNewCase = () => {
     setActiveId(null); setCastingCase(emptyCase()); setStep('setup'); setView('editor'); setMessage('New case started. A reference number is assigned when you save it.'); setError('');
-    setReviewerNotes(''); setCorrectiveAction(''); setVerificationResult('');
   };
   const openCase = (record: RegisterCase) => {
     setActiveId(record.id); setCastingCase(record.data); setStep('setup'); setView(record.status === 'closed' || record.status === 'awaiting_review' || record.status === 'under_investigation' ? 'review' : 'editor');
@@ -118,11 +114,6 @@ export default function App() {
       setMessage(`${ref} submitted successfully to Workshop System Central. Review and closure are managed there.`);
     } catch (e) { setError(e instanceof Error ? e.message : 'Could not submit case.'); }
     finally { setBusy(false); }
-  };
-
-  const setStatus = async (_status: CaseStatus) => {
-    setMessage('Formal review, investigation status and closure are managed in Workshop System Central.');
-    setError('');
   };
 
   const signIn = async (event: FormEvent) => {
@@ -175,7 +166,15 @@ export default function App() {
         </main>
       </>
     )}
-    {view === 'review' && activeRecord && <section className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-widest text-teal-700">Case review</p><h2 className="mt-1 text-2xl font-bold">{activeRecord.case_ref}</h2><p className="mt-1 text-sm text-slate-500">{activeRecord.data.setup.site || 'Site not specified'} · {activeRecord.data.setup.date}</p></div><span className={cn('rounded-full px-3 py-1.5 text-sm font-semibold',STATUS_CLASS[activeRecord.status])}>{STATUS_LABEL[activeRecord.status]}</span></div><div className="grid gap-4 sm:grid-cols-2"><div className="rounded-xl bg-slate-50 p-4"><h3 className="font-semibold">Reported defect</h3><p className="mt-2 text-sm">{activeRecord.data.defect.types.join(', ') || 'Not specified'}</p><p className="mt-1 text-sm text-slate-600">Location: {activeRecord.data.defect.location || 'Not specified'}</p><p className="mt-2 text-sm text-slate-600">Operative: {activeRecord.data.setup.operative || 'Not specified'}</p></div><div className="rounded-xl bg-slate-50 p-4"><h3 className="font-semibold">Casting setup</h3><p className="mt-2 text-sm">{activeRecord.data.setup.machineMake} {activeRecord.data.setup.machineModel}</p><p className="mt-1 text-sm text-slate-600">Metal: {activeRecord.data.alloy.metal} · {activeRecord.data.alloy.composition || 'Composition not specified'}</p><p className="mt-1 text-sm text-slate-600">Investment: {activeRecord.data.investment.manufacturer} {activeRecord.data.investment.product}</p></div></div><div className="flex flex-wrap gap-2"><button onClick={()=>{setCastingCase(activeRecord.data);setStep('report');setView('editor');}} className="rounded-lg border px-3 py-2 text-sm font-semibold">View full report</button>{activeRecord.status==='awaiting_review'&&<button disabled={busy} onClick={()=>setStatus('under_investigation')} className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">Start investigation</button>}</div>{activeRecord.status!=='closed'&&<div className="space-y-4 border-t pt-5"><div><h3 className="text-lg font-bold">Review and closure record</h3><p className="text-sm text-slate-500">Formal review, investigation and closure are completed in Workshop System Central.</p></div><label className="block text-sm font-medium">Review findings<textarea value={reviewerNotes} onChange={e=>setReviewerNotes(e.target.value)} rows={3} className="mt-1 w-full rounded-lg border border-slate-300 p-3" placeholder="Evidence reviewed, likely cause, outstanding concerns…"/></label><label className="block text-sm font-medium">Corrective action<textarea value={correctiveAction} onChange={e=>setCorrectiveAction(e.target.value)} rows={3} className="mt-1 w-full rounded-lg border border-slate-300 p-3" placeholder="Action taken or approved controlled trial…"/></label><label className="block text-sm font-medium">Verification result<textarea value={verificationResult} onChange={e=>setVerificationResult(e.target.value)} rows={3} className="mt-1 w-full rounded-lg border border-slate-300 p-3" placeholder="Evidence that the action worked, or why the case remains open…"/></label><div className="flex flex-wrap gap-2"><button disabled={busy||!reviewerNotes.trim()} onClick={()=>setStatus('under_investigation')} className="rounded-lg border px-4 py-2 text-sm font-semibold disabled:opacity-50">Save review notes</button><button disabled={busy||activeRecord.status!=='under_investigation'||!reviewerNotes.trim()||!correctiveAction.trim()||!verificationResult.trim()} onClick={()=>setStatus('closed')} className="flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"><ShieldCheck size={16}/> Close case</button></div></div>}{activeRecord.status==='closed'&&<div className="space-y-3 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-950"><h3 className="flex items-center gap-2 font-bold"><Archive size={17}/> Closure record</h3><p><b>Review findings:</b> {activeRecord.reviewer_notes||'—'}</p><p><b>Corrective action:</b> {activeRecord.corrective_action||'—'}</p><p><b>Verification:</b> {activeRecord.verification_result||'—'}</p><p><b>Closed:</b> {activeRecord.closed_at?new Date(activeRecord.closed_at).toLocaleString():'—'}</p></div>}<button onClick={()=>setView('register')} className="text-sm font-medium text-teal-800 underline">Back to case register</button></section>}
+    {view === 'review' && activeRecord && <section className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div><p className="text-xs font-semibold uppercase tracking-widest text-teal-700">Submitted diagnostic report</p><h2 className="mt-1 text-2xl font-bold">{activeRecord.case_ref}</h2><p className="mt-1 text-sm text-slate-500">{activeRecord.data.setup.site || 'Site not specified'} · {activeRecord.data.setup.date}</p></div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="rounded-xl bg-slate-50 p-4"><h3 className="font-semibold">Reported defect</h3><p className="mt-2 text-sm">{activeRecord.data.defect.types.join(', ') || 'Not specified'}</p><p className="mt-1 text-sm text-slate-600">Location: {activeRecord.data.defect.location || 'Not specified'}</p><p className="mt-2 text-sm text-slate-600">Operative: {activeRecord.data.setup.operative || 'Not specified'}</p></div>
+        <div className="rounded-xl bg-slate-50 p-4"><h3 className="font-semibold">Casting setup</h3><p className="mt-2 text-sm">{activeRecord.data.setup.machineMake} {activeRecord.data.setup.machineModel}</p><p className="mt-1 text-sm text-slate-600">Metal: {activeRecord.data.alloy.metal} · {activeRecord.data.alloy.composition || 'Composition not specified'}</p><p className="mt-1 text-sm text-slate-600">Investment: {activeRecord.data.investment.manufacturer} {activeRecord.data.investment.product}</p></div>
+      </div>
+      <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">This report is stored in Workshop System Central. Formal review, investigation and closure are managed in the central Hub.</p>
+      <div className="flex flex-wrap gap-2"><button onClick={()=>{setCastingCase(activeRecord.data);setStep('report');setView('editor');}} className="rounded-lg border px-3 py-2 text-sm font-semibold">View full report</button><button onClick={()=>setView('register')} className="text-sm font-medium text-teal-800 underline">Back to submitted reports</button></div>
+    </section>}
     <footer className="pb-8 text-center text-xs text-slate-400">Decision-support only. Technical changes must be validated and approved by the responsible specialist.</footer>
   </div></div>;
 }
