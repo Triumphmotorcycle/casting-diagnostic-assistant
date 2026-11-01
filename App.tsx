@@ -143,11 +143,59 @@ export default function App() {
 
   const stepIndex = STEPS.findIndex((s) => s.id === step);
 
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
+        <div className="w-full max-w-lg rounded-2xl border border-amber-200 bg-white p-8 shadow-sm">
+          <h1 className="text-xl font-bold text-slate-900">Workshop connection not configured</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            The diagnostic tool needs the Workshop System Supabase URL and public anon key in its GitHub Actions build settings.
+            No case has been submitted or stored centrally.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!authReady) {
+    return <div className="p-10 text-center text-slate-600">Checking workshop sign-in…</div>;
+  }
+
+  if (!session) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
+        <form onSubmit={handleSignIn} className="w-full max-w-md space-y-5 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-teal-700">Workshop quality system</p>
+            <h1 className="mt-2 text-2xl font-bold text-slate-900">Casting Diagnostic Assistant</h1>
+            <p className="mt-2 text-sm text-slate-600">Sign in with your authorised Workshop System account.</p>
+          </div>
+          {authError && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{authError}</p>}
+          <label className="block text-sm font-medium text-slate-700">
+            Email
+            <input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" className="mt-1 w-full rounded-lg border border-slate-300 p-3" />
+          </label>
+          <label className="block text-sm font-medium text-slate-700">
+            Password
+            <input required type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" className="mt-1 w-full rounded-lg border border-slate-300 p-3" />
+          </label>
+          <button disabled={authBusy} className="w-full rounded-lg bg-teal-800 px-4 py-3 font-semibold text-white disabled:opacity-50">
+            {authBusy ? "Signing in…" : "Sign in securely"}
+          </button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 print:bg-white">
       <div className="mx-auto max-w-7xl space-y-6 p-4 lg:p-8 print:max-w-none print:p-0">
-        <div className="print:hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
           <CaseHeader castingCase={castingCase} update={update} />
+          <div className="flex items-center gap-3 text-sm text-slate-600">
+            <span>{session.user.email}</span>
+            <button type="button" onClick={() => supabase?.auth.signOut()} className="rounded-lg border border-slate-300 px-3 py-2 hover:bg-white">Sign out</button>
+          </div>
         </div>
 
         <nav className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm print:hidden">
