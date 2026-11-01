@@ -1,0 +1,41 @@
+name: Diagnostic integration build check
+
+on:
+  push:
+    branches:
+      - "integration/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Verify central Workshop backend
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          node --input-type=module -e '
+            const url = process.env.VITE_SUPABASE_URL || "";
+            const key = process.env.VITE_SUPABASE_ANON_KEY || "";
+            const projectRef = url ? new URL(url).hostname.split(".")[0] : "";
+            console.log("Configured Supabase project:", projectRef || "(missing)");
+            if (projectRef !== "qnadbtbwpaotgzheffdr" || !key) {
+              console.error("Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to the Workshop System (workshop-hub) project.");
+              process.exit(1);
+            }
+          '
+      - run: npm install
+      - name: Build diagnostic assistant
+        run: npm run build
+        env:
+          GITHUB_PAGES: true
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}

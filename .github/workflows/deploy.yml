@@ -32,10 +32,27 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Verify central Workshop backend
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          node --input-type=module -e '
+            const url = process.env.VITE_SUPABASE_URL || "";
+            const key = process.env.VITE_SUPABASE_ANON_KEY || "";
+            const projectRef = url ? new URL(url).hostname.split(".")[0] : "";
+            console.log("Configured Supabase project:", projectRef || "(missing)");
+            if (projectRef !== "qnadbtbwpaotgzheffdr" || !key) {
+              console.error("Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to the Workshop System (workshop-hub) project.");
+              process.exit(1);
+            }
+          '
       - name: Build app
         run: npm run build
         env:
           GITHUB_PAGES: true
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Upload built site
         uses: actions/upload-pages-artifact@v3

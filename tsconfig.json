@@ -20,5 +20,20 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": [
+    "App.tsx",
+    "main.tsx",
+    "src/components/**/*.tsx",
+    "src/lib/**/*.ts",
+    "src/types/**/*.ts",
+    "src/vite-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/App.tsx",
+    "src/main.tsx",
+    "src/src/**",
+    "src/lib/src/**",
+    "src/vite.config.ts"
+  ]
 }
