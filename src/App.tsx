@@ -46,8 +46,15 @@ export default function App() {
     const mapped = (data ?? []).map((row: any) => {
       const submitted = row.original_submission ?? {};
       const diagnosticData = submitted.casting_case && typeof submitted.casting_case === 'object' ? submitted.casting_case as CastingCase : emptyCase();
+      const caseRef = row.case_ref || `CAST-${String(row.case_number).padStart(6, '0')}`;
+      // The central register is the source of truth for the permanent case reference.
+      // Apply it whenever a submitted case is loaded so reports never revert to "NEW CASE".
+      const dataWithReference: CastingCase = {
+        ...diagnosticData,
+        setup: { ...diagnosticData.setup, caseRef }
+      };
       const status: CaseStatus = row.status === 'closed' ? 'closed' : row.status === 'under_investigation' ? 'under_investigation' : 'awaiting_review';
-      return { id: row.id, case_ref: row.case_ref || `CAST-${String(row.case_number).padStart(6, '0')}`, status, data: diagnosticData, created_at: row.submitted_at, updated_at: row.submitted_at, created_by: row.submitted_by, submitted_at: row.submitted_at, reviewer_notes: '', corrective_action: '', verification_result: '', closed_at: null } as RegisterCase;
+      return { id: row.id, case_ref: caseRef, status, data: dataWithReference, created_at: row.submitted_at, updated_at: row.submitted_at, created_by: row.submitted_by, submitted_at: row.submitted_at, reviewer_notes: '', corrective_action: '', verification_result: '', closed_at: null } as RegisterCase;
     });
     setCases(mapped);
   }, []);
