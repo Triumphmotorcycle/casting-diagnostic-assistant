@@ -2,7 +2,7 @@ import { CastingCase } from '@/types/casting';
 
 export type CaseStatus = 'draft' | 'awaiting_review' | 'under_investigation' | 'closed';
 export interface RegisterCase {
-  id: number;
+  id: string;
   case_ref: string;
   status: CaseStatus;
   data: CastingCase;
