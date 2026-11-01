@@ -24,6 +24,7 @@ import {
   AlertTriangle,
   UserCheck,
   ClipboardList,
+  Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,7 @@ interface Props {
   castingCase: CastingCase;
   update: (patch: Partial<CastingCase>) => void;
   onBack: () => void;
+  onSubmitToRegister: (castingCase: CastingCase) => Promise<{ caseRef?: string; error?: string }>;
 }
 
 const STATUS_LABEL: Record<RecommendationStatus, string> = {
@@ -49,7 +51,10 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function ReportStep({ castingCase, update, onBack }: Props) {
+export function ReportStep({ castingCase, update, onBack, onSubmitToRegister }: Props) {
+  const [submitting, setSubmitting] = useState(false);
+  const [submittedRef, setSubmittedRef] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const hypotheses = useMemo(() => runDiagnosis(castingCase), [castingCase]);
   const [saved, setSaved] = useState(false);
   const { setup, alloy, investment, tree, defect, review } = castingCase;
@@ -66,6 +71,21 @@ export function ReportStep({ castingCase, update, onBack }: Props) {
   };
 
   const handlePrint = () => window.print();
+
+  const handleSubmitToRegister = async () => {
+    if (submitting || submittedRef) return;
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const result = await onSubmitToRegister(castingCase);
+      if (result.error) setSubmitError(result.error);
+      else setSubmittedRef(result.caseRef || "submitted");
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Could not submit this report.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const approvalTone =
     review.approvalStatus === "approved"
@@ -406,6 +426,16 @@ export function ReportStep({ castingCase, update, onBack }: Props) {
         )}
 
         <div className="flex flex-col gap-2 print:hidden">
+          {submitError && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{submitError}</p>}
+          {submittedRef ? (
+            <div role="status" className="rounded-lg border border-teal-200 bg-teal-50 p-3 text-sm text-teal-900">
+              Submitted to the central Workshop System as <strong>{submittedRef}</strong>.
+            </div>
+          ) : (
+            <Button onClick={handleSubmitToRegister} disabled={submitting} className="bg-teal-800 hover:bg-teal-900">
+              <Send className="mr-2 h-4 w-4" /> {submitting ? "Submitting…" : "Submit to central workshop"}
+            </Button>
+          )}
           <Button onClick={handleSave} className="bg-teal-700 hover:bg-teal-800">
             {saved ? (
               <>
