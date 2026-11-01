@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import type { Session } from "@supabase/supabase-js";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { CastingCase } from "@/types/casting";
 import { emptyCase, loadCase, saveCase } from "@/lib/caseStore";
 import { CaseHeader } from "@/components/CaseHeader";
@@ -27,6 +29,103 @@ export default function App() {
   const [castingCase, setCastingCase] = useState<CastingCase>(() => loadCase() ?? emptyCase());
   const [step, setStep] = useState<StepId>("setup");
   const [saved, setSaved] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const [profile, setProfile] = useState<{ display_name: string; site_name: string } | null>(null);
+
+  useEffect(() => {
+    if (!supabase) {
+      setAuthReady(true);
+      return;
+    }
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (error) setAuthError(error.message);
+      setSession(data.session);
+      setAuthReady(true);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!session?.user.id || !supabase) {
+      setProfile(null);
+      return;
+    }
+    let active = true;
+    supabase
+      .from("workshop_profiles")
+      .select("display_name, site_name")
+      .eq("user_id", session.user.id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (error) {
+          setAuthError(`Could not load workshop profile: ${error.message}`);
+          return;
+        }
+        if (data) {
+          setProfile(data);
+          setCastingCase((current) => ({
+            ...current,
+            setup: {
+              ...current.setup,
+              site: current.setup.site || data.site_name || "",
+              operative: current.setup.operative || data.display_name || "",
+            },
+          }));
+        }
+      });
+    return () => { active = false; };
+  }, [session?.user.id]);
+
+  async function handleSignIn(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!supabase) return;
+    setAuthBusy(true);
+    setAuthError("");
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    if (error) setAuthError(error.message);
+    setAuthBusy(false);
+  }
+
+  async function handleSubmitToRegister(submittedCase: CastingCase): Promise<{ caseRef?: string; error?: string }> {
+    if (!supabase || !session?.user) return { error: "Sign in before submitting this diagnostic report." };
+    const siteName = submittedCase.setup.site.trim() || profile?.site_name?.trim() || "";
+    if (!siteName) return { error: "Enter the workshop site in Setup before submitting." };
+    const defectLabel = submittedCase.defect.types.length
+      ? submittedCase.defect.types.join(", ")
+      : "Defect investigation";
+    const caseTitle = `Casting diagnostic — ${defectLabel}`;
+    const { data, error } = await supabase
+      .from("workshop_cases")
+      .insert({
+        site_name: siteName,
+        title: caseTitle,
+        original_submission: {
+          details: `Casting diagnostic submitted by ${submittedCase.setup.operative.trim() || profile?.display_name || "an authorised workshop user"}.`,
+          submitted_at_client: new Date().toISOString(),
+          submitted_from: "Casting Diagnostic Assistant",
+          diagnostic_case: submittedCase,
+        },
+        submitted_by: session.user.id,
+        status: "submitted",
+      })
+      .select("case_number, case_ref")
+      .single();
+    if (error) return { error: error.message };
+    const caseRef = data.case_ref || `CAST-${String(data.case_number).padStart(6, "0")}`;
+    return { caseRef };
+  }
 
   const update = (patch: Partial<CastingCase>) =>
     setCastingCase((prev) => ({ ...prev, ...patch }));
@@ -127,7 +226,7 @@ export default function App() {
             />
           )}
           {step === "report" && (
-            <ReportStep castingCase={castingCase} update={update} onBack={() => setStep("trials")} />
+            <ReportStep castingCase={castingCase} update={update} onBack={() => setStep("trials")} onSubmitToRegister={handleSubmitToRegister} />
           )}
         </main>
 
