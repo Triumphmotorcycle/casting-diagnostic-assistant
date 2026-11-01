@@ -34,3 +34,32 @@
     background: white !important;
   }
 }
+
+/* TJ Gold & Diamond shared workshop identity — presentation only */
+:root { --tj-ink:#17191d; --tj-paper:#f5f2ec; --tj-paper-2:#fbfaf7; --tj-gold:#d2a654; --tj-gold-dark:#936b27; --tj-line:#e4ded4; }
+body { background:var(--tj-paper)!important; color:var(--tj-ink); }
+.cda-header { background:var(--tj-ink)!important; border:1px solid var(--tj-gold); box-shadow:0 12px 32px rgba(31,28,22,.10); }
+.cda-header-brand { display:flex; align-items:center; gap:20px; }
+.cda-header-brand img { width:150px; max-height:72px; object-fit:contain; }
+.cda-header-brand p, .cda-header-brand h1 { color:#f7f1e7!important; }
+.cda-header-brand p:last-child { color:#c5c0b7!important; }
+.cda-login-brand { display:flex; align-items:center; gap:18px; }
+.cda-login-brand img { width:112px; height:auto; object-fit:contain; background:var(--tj-ink); border-radius:8px; padding:8px; }
+.cda-login-brand h1 { color:var(--tj-ink)!important; }
+.cda-login-brand p { color:#6f6b64!important; }
+.bg-slate-100 { background-color:var(--tj-paper)!important; }
+.bg-white { background-color:var(--tj-paper-2)!important; }
+.border-slate-200, .border-slate-300 { border-color:var(--tj-line)!important; }
+.text-slate-900 { color:var(--tj-ink)!important; }
+.text-slate-700, .text-slate-600 { color:#514f4a!important; }
+.text-slate-500, .text-slate-400 { color:#817d75!important; }
+.bg-teal-900, .bg-teal-800 { background-color:var(--tj-gold-dark)!important; color:#fff!important; }
+.text-teal-800, .text-teal-900, .text-teal-700 { color:var(--tj-gold-dark)!important; }
+.bg-teal-50 { background-color:#f4ead6!important; }
+.bg-teal-100 { background-color:#ead9b7!important; }
+.border-teal-700 { border-color:var(--tj-gold-dark)!important; }
+.ring-teal-100 { --tw-ring-color:#ead9b7!important; }
+button.bg-teal-800, button.bg-teal-900 { background-color:var(--tj-gold)!important; color:var(--tj-ink)!important; }
+button.bg-teal-800:hover, button.bg-teal-900:hover { background-color:#e2bd70!important; }
+input, select, textarea { background-color:#fffefa; border-color:#d8d0c4; color:var(--tj-ink); }
+@media (max-width:640px) { .cda-header-brand { align-items:flex-start; } .cda-header-brand img { width:92px; } .cda-login-brand { align-items:flex-start; flex-direction:column; } }
