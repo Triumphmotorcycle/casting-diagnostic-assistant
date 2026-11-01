@@ -87,21 +87,6 @@ export function ReportStep({ castingCase, update, onBack, onSubmitToRegister }: 
     }
   };
 
-  const handleSubmitToRegister = async () => {
-    if (submitting || submittedRef) return;
-    setSubmitting(true);
-    setSubmitError("");
-    try {
-      const result = await onSubmitToRegister(castingCase);
-      if (result.error) setSubmitError(result.error);
-      else setSubmittedRef(result.caseRef || "submitted");
-    } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : "Could not submit this report.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   const approvalTone =
     review.approvalStatus === "approved"
       ? "border-teal-200 bg-teal-50 text-teal-800"
