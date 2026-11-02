@@ -31,6 +31,7 @@ export default function App() {
   const [cases, setCases] = useState<RegisterCase[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [castingCase, setCastingCase] = useState<CastingCase>(() => emptyCase());
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [step, setStep] = useState<StepId>('setup');
   const [view, setView] = useState<'register' | 'editor' | 'review'>('register');
   const [filter, setFilter] = useState<CaseStatus | 'all'>('all');
@@ -76,7 +77,7 @@ export default function App() {
   const activeRecord = useMemo(() => cases.find((item) => item.id === activeId) ?? null, [cases, activeId]);
   const update = (patch: Partial<CastingCase>) => setCastingCase((prev) => ({ ...prev, ...patch }));
   const beginNewCase = () => {
-    setActiveId(null); setCastingCase(emptyCase()); setStep('setup'); setView('editor'); setMessage('New case started. A reference number is assigned when you save it.'); setError('');
+    setActiveId(null); setCastingCase(emptyCase()); setPhotoFiles([]); setStep('setup'); setView('editor'); setMessage('New case started. A reference number is assigned when you save it.'); setError('');
   };
   const openCase = (record: RegisterCase) => {
     setActiveId(record.id); setCastingCase(record.data); setStep('setup'); setView(record.status === 'closed' || record.status === 'awaiting_review' || record.status === 'under_investigation' ? 'review' : 'editor');
@@ -111,14 +112,48 @@ export default function App() {
           submitted_from: 'Casting Diagnostic Assistant',
           casting_case: castingCase
         }
-      }).select('case_number, case_ref').single();
+      }).select('id, case_number, case_ref').single();
       if (insertError) throw insertError;
+
       const ref = data.case_ref || `CAST-${String(data.case_number).padStart(6, '0')}`;
+      let photoStatus = '';
+      if (photoFiles.length) {
+        let uploaded = 0;
+        const photoErrors: string[] = [];
+        for (const file of photoFiles) {
+          const path = `${data.id}/${crypto.randomUUID()}.jpg`;
+          const upload = await supabase.storage.from('workshop-case-photos').upload(path, file, {
+            contentType: 'image/jpeg', cacheControl: '3600', upsert: false
+          });
+          if (upload.error) { photoErrors.push(file.name + ': ' + upload.error.message); continue; }
+          const evidence = await supabase.from('workshop_case_evidence').insert({
+            case_id: data.id,
+            added_by: user.id,
+            evidence_type: 'photo',
+            content: {
+              bucket: 'workshop-case-photos',
+              path,
+              filename: file.name,
+              content_type: 'image/jpeg',
+              size_bytes: file.size
+            }
+          });
+          if (evidence.error) {
+            await supabase.storage.from('workshop-case-photos').remove([path]);
+            photoErrors.push(file.name + ': ' + evidence.error.message);
+          } else uploaded += 1;
+        }
+        photoStatus = uploaded === photoFiles.length
+          ? ` ${uploaded} photo${uploaded === 1 ? '' : 's'} attached.`
+          : ` ${uploaded} of ${photoFiles.length} photos attached; ${photoErrors.length} could not be saved. Please tell the Hub administrator.`;
+      }
+
       setCastingCase((current) => ({ ...current, setup: { ...current.setup, caseRef: ref } }));
+      setPhotoFiles([]);
       await refreshCases();
       setView('register');
       setFilter('awaiting_review');
-      setMessage(`${ref} submitted successfully to Workshop System Central. Review and closure are managed there.`);
+      setMessage(`${ref} submitted successfully to Workshop System Central. Review and closure are managed there.${photoStatus}`);
     } catch (e) { setError(e instanceof Error ? e.message : 'Could not submit case.'); }
     finally { setBusy(false); }
   };
@@ -166,7 +201,7 @@ export default function App() {
         <main>
           {step === 'setup' && <SetupStep castingCase={castingCase} update={update} onNext={() => setStep('parameters')} />}
           {step === 'parameters' && <ParametersStep castingCase={castingCase} update={update} onBack={() => setStep('setup')} onNext={() => setStep('defect')} />}
-          {step === 'defect' && <DefectStep castingCase={castingCase} update={update} onBack={() => setStep('parameters')} onNext={() => setStep('diagnosis')} />}
+          {step === 'defect' && <DefectStep castingCase={castingCase} update={update} onBack={() => setStep('parameters')} onNext={() => setStep('diagnosis')} photoFiles={photoFiles} onPhotoFilesChange={setPhotoFiles} />}
           {step === 'diagnosis' && <DiagnosisStep castingCase={castingCase} onBack={() => setStep('defect')} onNext={() => setStep('trials')} />}
           {step === 'trials' && <TrialStep castingCase={castingCase} update={update} onBack={() => setStep('diagnosis')} onNext={() => setStep('report')} />}
           {step === 'report' && <ReportStep castingCase={castingCase} update={update} onBack={() => setStep('trials')} />}

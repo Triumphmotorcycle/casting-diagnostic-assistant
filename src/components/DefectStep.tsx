@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { PhotoAttachments } from "@/components/PhotoAttachments";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -19,6 +20,8 @@ interface Props {
   update: (patch: Partial<CastingCase>) => void;
   onBack: () => void;
   onNext: () => void;
+  photoFiles?: File[];
+  onPhotoFilesChange?: (files: File[]) => void;
 }
 
 const SYMPTOMS: { id: DefectType; label: string }[] = [
@@ -34,7 +37,7 @@ const SYMPTOMS: { id: DefectType; label: string }[] = [
   { id: "other", label: "Other" },
 ];
 
-export function DefectStep({ castingCase, update, onBack, onNext }: Props) {
+export function DefectStep({ castingCase, update, onBack, onNext, photoFiles = [], onPhotoFilesChange = () => {} }: Props) {
   const { defect } = castingCase;
   const setDefect = (patch: Partial<CastingCase["defect"]>) =>
     update({ defect: { ...defect, ...patch } });
@@ -148,6 +151,16 @@ export function DefectStep({ castingCase, update, onBack, onNext }: Props) {
               <Label className="text-xs font-medium text-slate-600">Radiography / CT / microscopy evidence</Label>
               <Textarea value={defect.radiographyEvidence} onChange={(e) => setDefect({ radiographyEvidence: e.target.value })} rows={2} placeholder="Describe any sectioning or imaging evidence" />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="border-b border-slate-100 bg-slate-50">
+            <CardTitle className="text-base font-semibold text-slate-800">Photographic evidence</CardTitle>
+            <CardDescription>Attach clear images to support the diagnostic report. Photos will be stored securely with the submitted case.</CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            <PhotoAttachments files={photoFiles} onChange={onPhotoFilesChange} />
           </CardContent>
         </Card>
       </div>
