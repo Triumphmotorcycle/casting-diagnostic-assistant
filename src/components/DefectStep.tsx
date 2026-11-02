@@ -20,8 +20,8 @@ interface Props {
   update: (patch: Partial<CastingCase>) => void;
   onBack: () => void;
   onNext: () => void;
-  photoFiles: File[];
-  onPhotoFilesChange: (files: File[]) => void;
+  photoFiles?: File[];
+  onPhotoFilesChange?: (files: File[]) => void;
 }
 
 const SYMPTOMS: { id: DefectType; label: string }[] = [
