@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { PhotoAttachments } from "@/components/PhotoAttachments";
 import { cn } from "@/lib/utils";
 
 interface Props {
