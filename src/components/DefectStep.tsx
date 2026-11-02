@@ -20,6 +20,8 @@ interface Props {
   update: (patch: Partial<CastingCase>) => void;
   onBack: () => void;
   onNext: () => void;
+  photoFiles: File[];
+  onPhotoFilesChange: (files: File[]) => void;
 }
 
 const SYMPTOMS: { id: DefectType; label: string }[] = [
@@ -35,7 +37,7 @@ const SYMPTOMS: { id: DefectType; label: string }[] = [
   { id: "other", label: "Other" },
 ];
 
-export function DefectStep({ castingCase, update, onBack, onNext }: Props) {
+export function DefectStep({ castingCase, update, onBack, onNext, photoFiles, onPhotoFilesChange }: Props) {
   const { defect } = castingCase;
   const setDefect = (patch: Partial<CastingCase["defect"]>) =>
     update({ defect: { ...defect, ...patch } });
