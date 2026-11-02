@@ -153,6 +153,16 @@ export function DefectStep({ castingCase, update, onBack, onNext, photoFiles, on
             </div>
           </CardContent>
         </Card>
+
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="border-b border-slate-100 bg-slate-50">
+            <CardTitle className="text-base font-semibold text-slate-800">Photographic evidence</CardTitle>
+            <CardDescription>Attach clear images to support the diagnostic report. Photos will be stored securely with the submitted case.</CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            <PhotoAttachments files={photoFiles} onChange={onPhotoFilesChange} />
+          </CardContent>
+        </Card>
       </div>
 
       <div className="space-y-4">
