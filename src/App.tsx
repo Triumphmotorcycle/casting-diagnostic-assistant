@@ -31,6 +31,7 @@ export default function App() {
   const [cases, setCases] = useState<RegisterCase[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [castingCase, setCastingCase] = useState<CastingCase>(() => emptyCase());
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [step, setStep] = useState<StepId>('setup');
   const [view, setView] = useState<'register' | 'editor' | 'review'>('register');
   const [filter, setFilter] = useState<CaseStatus | 'all'>('all');
@@ -76,7 +77,7 @@ export default function App() {
   const activeRecord = useMemo(() => cases.find((item) => item.id === activeId) ?? null, [cases, activeId]);
   const update = (patch: Partial<CastingCase>) => setCastingCase((prev) => ({ ...prev, ...patch }));
   const beginNewCase = () => {
-    setActiveId(null); setCastingCase(emptyCase()); setStep('setup'); setView('editor'); setMessage('New case started. A reference number is assigned when you save it.'); setError('');
+    setActiveId(null); setCastingCase(emptyCase()); setPhotoFiles([]); setStep('setup'); setView('editor'); setMessage('New case started. A reference number is assigned when you save it.'); setError('');
   };
   const openCase = (record: RegisterCase) => {
     setActiveId(record.id); setCastingCase(record.data); setStep('setup'); setView(record.status === 'closed' || record.status === 'awaiting_review' || record.status === 'under_investigation' ? 'review' : 'editor');
@@ -166,7 +167,7 @@ export default function App() {
         <main>
           {step === 'setup' && <SetupStep castingCase={castingCase} update={update} onNext={() => setStep('parameters')} />}
           {step === 'parameters' && <ParametersStep castingCase={castingCase} update={update} onBack={() => setStep('setup')} onNext={() => setStep('defect')} />}
-          {step === 'defect' && <DefectStep castingCase={castingCase} update={update} onBack={() => setStep('parameters')} onNext={() => setStep('diagnosis')} />}
+          {step === 'defect' && <DefectStep castingCase={castingCase} update={update} onBack={() => setStep('parameters')} onNext={() => setStep('diagnosis')} photoFiles={photoFiles} onPhotoFilesChange={setPhotoFiles} />}
           {step === 'diagnosis' && <DiagnosisStep castingCase={castingCase} onBack={() => setStep('defect')} onNext={() => setStep('trials')} />}
           {step === 'trials' && <TrialStep castingCase={castingCase} update={update} onBack={() => setStep('diagnosis')} onNext={() => setStep('report')} />}
           {step === 'report' && <ReportStep castingCase={castingCase} update={update} onBack={() => setStep('trials')} />}
