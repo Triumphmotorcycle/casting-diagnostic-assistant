@@ -4,10 +4,10 @@
 body { background:var(--tj-paper)!important; color:#191919!important; }
 .cda-header { background:#fff!important; border:1px solid var(--tj-line)!important; box-shadow:0 5px 20px rgba(35,30,20,.06)!important; color:#191919!important; }
 .cda-header-brand { gap:22px; }
-.cda-header-brand img { width:172px!important; max-height:82px!important; filter:invert(1); background:transparent!important; padding:0!important; }
+.cda-header-brand img { width:172px!important; max-height:82px!important; filter:none; background:transparent!important; padding:0!important; }
 .cda-header-brand p,.cda-header-brand h1 { color:#191919!important; }
 .cda-header-brand p:last-child { color:#6c675f!important; }
-.cda-login-brand img { width:150px!important; background:transparent!important; padding:0!important; filter:invert(1); }
+.cda-login-brand img { width:150px!important; background:transparent!important; padding:0!important; filter:none; }
 .cda-login-brand h1 { color:#191919!important; }
 .cda-login-brand p { color:#5f5a52!important; }
 .bg-slate-100 { background-color:var(--tj-paper)!important; }
@@ -97,10 +97,10 @@ input, select, textarea { background-color:#fffefa; border-color:#d8d0c4; color:
 body { background:var(--tj-paper)!important; color:#191919!important; }
 .cda-header { background:#fff!important; border:1px solid var(--tj-line)!important; box-shadow:0 5px 20px rgba(35,30,20,.06)!important; color:#191919!important; }
 .cda-header-brand { gap:22px; }
-.cda-header-brand img { width:172px!important; max-height:82px!important; filter:invert(1); background:transparent!important; padding:0!important; }
+.cda-header-brand img { width:172px!important; max-height:82px!important; filter:none; background:transparent!important; padding:0!important; }
 .cda-header-brand p,.cda-header-brand h1 { color:#191919!important; }
 .cda-header-brand p:last-child { color:#6c675f!important; }
-.cda-login-brand img { width:150px!important; background:transparent!important; padding:0!important; filter:invert(1); }
+.cda-login-brand img { width:150px!important; background:transparent!important; padding:0!important; filter:none; }
 .cda-login-brand h1 { color:#191919!important; }
 .cda-login-brand p { color:#5f5a52!important; }
 .bg-slate-100 { background-color:var(--tj-paper)!important; }
@@ -143,3 +143,6 @@ button.bg-teal-800,button.bg-teal-900 { background:#b58a3b!important; color:#171
 button.bg-teal-800:hover,button.bg-teal-900:hover { background:#c8a45f!important; }
 input,select,textarea { background:#fff!important; border-color:#cfc8bc!important; color:#202020!important; }
 input::placeholder,textarea::placeholder { color:#777168!important; opacity:1!important; }
+
+/* Final identity refinement */
+.cda-header-brand img,.cda-login-brand img{filter:none!important;background:#fff!important;object-fit:contain!important;width:205px!important;max-height:88px!important;padding:0!important;border:0!important;border-radius:0!important}.cda-header-brand{gap:26px!important}.cda-header-brand>div>p:first-child,.cda-login-brand>div>p:first-child{display:none!important}.cda-header-brand h1,.cda-login-brand h1{font-family:"Bodoni Moda",Georgia,serif!important;font-weight:500!important;letter-spacing:-.025em!important}
