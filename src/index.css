@@ -29,3 +29,47 @@ input::placeholder,textarea::placeholder{color:#827c72!important;opacity:1!impor
 button:focus-visible{outline:2px solid #b58a3b!important;outline-offset:2px!important}
 @media(max-width:640px){.cda-header{align-items:flex-start;flex-direction:column}.cda-header-brand{align-items:flex-start;flex-direction:column;gap:14px}.cda-header-brand img,.cda-login-brand img{width:185px!important}}
 @media print{@page{margin:14mm}body{background:#fff!important}.print\:hidden{display:none!important}.print\:break-inside-avoid{break-inside:avoid;page-break-inside:avoid}.print\:max-w-none{max-width:none!important}.print\:p-0{padding:0!important}.print\:mt-0{margin-top:0!important}.print\:bg-white{background:#fff!important}}
+
+/* Unified TJ workshop system styling — visual-only overrides. */
+:root{--tj-ivory:#f5f1e9;--tj-paper:#fffdf9;--tj-charcoal:#1c1c1c;--tj-gold:#c9a24a;--tj-gold-btn:#d9b45d;--tj-border:#dfd5c7;--tj-muted:#625e58}
+html,body,#root{min-height:100%;background:var(--tj-ivory)!important;color:#171717!important}
+body{font-family:"DM Sans",Arial,sans-serif!important}
+.cda-header{
+ min-height:124px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;
+ padding:16px 28px!important;background:#fbf8f2!important;color:#171717!important;
+ border:0!important;border-bottom:5px solid var(--tj-gold)!important;border-radius:0!important;
+ box-shadow:0 2px 8px rgba(30,24,15,.06)!important
+}
+.cda-header-brand{display:flex!important;align-items:center!important;gap:24px!important}
+.cda-header-brand img{width:245px!important;max-height:100px!important}
+.cda-header-brand h1{margin:0!important;color:#171717!important;font-family:"Bodoni Moda",Georgia,serif!important;font-size:30px!important;font-weight:500!important}
+.cda-header-brand p{color:#625e58!important}
+.cda-header button{color:#292722!important;background:#f4f0e8!important;border:1px solid #d8d0c3!important;border-radius:5px!important}
+.cda-header button:hover{background:#eae3d6!important}
+.cda-login-brand h1{color:#171717!important;font-family:"Bodoni Moda",Georgia,serif!important;font-weight:500!important}
+form.rounded-2xl,.cda-login-brand{border-radius:8px}
+.bg-slate-100{background-color:var(--tj-ivory)!important}
+.bg-white{background-color:#fffdf9!important}
+.border-slate-200,.border-slate-300{border-color:var(--tj-border)!important}
+.text-slate-900{color:#202020!important}
+.text-slate-700,.text-slate-600{color:#393630!important}
+.text-slate-500,.text-slate-400{color:#68635b!important}
+.bg-teal-900,.bg-teal-800{background-color:var(--tj-gold-btn)!important;color:#171717!important}
+.text-teal-800,.text-teal-900,.text-teal-700{color:#76551f!important}
+.bg-teal-50{background-color:#f8f2e7!important}
+.bg-teal-100{background-color:#eee2ca!important}
+.border-teal-700{border-color:var(--tj-gold)!important}
+.ring-teal-100{--tw-ring-color:#eee2ca!important}
+input,select,textarea{background:#fff!important;border-color:#cfc8bc!important;color:#202020!important;border-radius:5px!important}
+input::placeholder,textarea::placeholder{color:#827c72!important;opacity:1!important}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--tj-gold)!important;outline-offset:1px!important;border-color:var(--tj-gold)!important}
+button:focus-visible{outline:2px solid var(--tj-gold)!important;outline-offset:2px!important}
+button.bg-teal-800,button.bg-teal-900{background:var(--tj-gold-btn)!important;color:#171717!important;border:1px solid #c59b46!important}
+.bg-red-50{background:#fff1ef!important}.text-red-700{color:#8b2e28!important}
+@media(max-width:640px){
+ .cda-header{align-items:flex-start!important;flex-direction:column!important;padding:18px!important;gap:16px!important}
+ .cda-header-brand{align-items:flex-start!important;flex-direction:column!important;gap:12px!important}
+ .cda-header-brand img{width:205px!important}
+ .cda-header-brand h1{font-size:26px!important}
+}
+@media print{.cda-header{display:none!important}}
