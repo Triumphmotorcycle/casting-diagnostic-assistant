@@ -78,3 +78,8 @@ button.bg-teal-800,button.bg-teal-900{background:var(--tj-gold-btn)!important;co
 .cda-header-brand img{width:min(420px,38vw)!important;max-height:76px!important;height:auto!important;object-fit:contain!important;object-position:left center!important}
 .cda-login-brand img{width:280px!important;max-height:70px!important;height:auto!important;object-fit:contain!important}
 @media(max-width:640px){.cda-header-brand img{width:min(360px,100%)!important;max-height:62px!important}.cda-login-brand img{width:250px!important;max-height:64px!important}}
+
+
+/* The TJ wordmark is black on the ivory CDA header and sign-in panel. */
+.cda-header-brand img,
+.cda-login-brand img{filter:brightness(0) saturate(100%)!important}
