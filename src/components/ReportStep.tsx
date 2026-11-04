@@ -400,7 +400,7 @@ export function ReportStep({ castingCase, update, onBack, onSubmitToRegister }: 
 
         {approvalBlocked && (
           <Card className="border-rose-300 bg-rose-50 shadow-sm print:break-inside-avoid">
-            <CardContent className="flex gap-3 p-4">
+            <CardContent className="flex items-center gap-3 p-4">
               <AlertTriangle className="h-5 w-5 shrink-0 text-rose-600" />
               <div className="text-sm text-rose-900">
                 <p className="font-semibold">Approval blocked</p>
@@ -456,7 +456,7 @@ export function ReportStep({ castingCase, update, onBack, onSubmitToRegister }: 
         </div>
 
         <Card className="border-slate-200 bg-slate-50 shadow-sm print:break-inside-avoid">
-          <CardContent className="flex gap-3 p-4 text-xs text-slate-500">
+          <CardContent className="flex items-center gap-3 p-4 text-xs text-slate-500">
             <ClipboardList className="h-4 w-4 shrink-0 text-slate-400" />
             <span>
               This report is a decision-support record. The responsible technical specialist remains accountable for
