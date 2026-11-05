@@ -83,3 +83,56 @@ button.bg-teal-800,button.bg-teal-900{background:var(--tj-gold-btn)!important;co
 /* The TJ wordmark is black on the ivory CDA header and sign-in panel. */
 .cda-header-brand img,
 .cda-login-brand img{filter:brightness(0) saturate(100%)!important}
+
+
+/* CDA welcome and first-use guidance */
+.cda-welcome{color:#24211d}
+.cda-welcome-hero{display:grid;grid-template-columns:1.1fr .9fr;min-height:340px;background:#1c1c1c;color:#fff;overflow:hidden;border-radius:8px;box-shadow:0 12px 30px rgba(28,24,18,.12)}
+.cda-welcome-hero-copy{padding:clamp(28px,5vw,58px);align-self:center}
+.cda-eyebrow{font-size:10px;letter-spacing:.2em;font-weight:700;color:#b58a3b}
+.cda-welcome-hero h2,.cda-guidance-panel-dark h3{margin:16px 0;font-family:"Bodoni Moda",Georgia,serif;font-size:clamp(32px,4vw,48px);line-height:1.12;font-weight:400;letter-spacing:-.03em}
+.cda-welcome-hero h2 em,.cda-guidance-panel-dark h3 em{color:#d9b45d;font-weight:400}
+.cda-welcome-intro{max-width:560px;color:#d6d0c5;font-size:14px;line-height:1.8}
+.cda-welcome-hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.cda-gold-button,.cda-outline-button,.cda-continue-button{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:12px 17px;font-size:13px;font-weight:700;border-radius:4px;transition:background .15s ease}
+.cda-gold-button{background:#d9b45d;color:#171717;border:1px solid #d9b45d}
+.cda-gold-button:hover,.cda-continue-button:hover{background:#c69e49}
+.cda-outline-button{border:1px solid #8c8579;color:#fff;background:transparent}
+.cda-outline-button:hover{background:#34312c}
+.cda-welcome-hero-art{position:relative;min-height:300px;overflow:hidden;background:radial-gradient(ellipse at 52% 56%,rgba(226,154,52,.85) 0,rgba(160,75,22,.58) 14%,rgba(66,37,23,.75) 34%,transparent 62%),linear-gradient(135deg,#302820,#111 70%)}
+.cda-welcome-hero-art:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 38px,rgba(216,180,93,.12) 39px,transparent 40px 78px);opacity:.7}
+.cda-art-ring{position:absolute;border:1px solid rgba(224,185,104,.55);border-radius:50%;transform:rotate(-24deg)}
+.cda-art-ring-one{width:360px;height:150px;left:10%;top:25%}
+.cda-art-ring-two{width:300px;height:115px;left:18%;top:32%;transform:rotate(38deg)}
+.cda-art-pour{position:absolute;width:8px;height:230px;left:54%;top:-20px;background:linear-gradient(#fff2bf,#efad42 35%,#d66b22 75%,transparent);filter:blur(3px);transform:rotate(8deg);box-shadow:0 0 28px 8px rgba(231,151,54,.35)}
+.cda-art-glow{position:absolute;width:190px;height:80px;left:36%;bottom:16%;border-radius:50%;background:radial-gradient(ellipse,rgba(255,188,73,.9),rgba(190,80,20,.45) 45%,transparent 72%);filter:blur(8px)}
+.cda-welcome-hero-art>span{position:absolute;bottom:24px;left:24px;color:#d9c49b;font-size:9px;letter-spacing:.22em}
+.cda-welcome-section-head{display:flex;align-items:end;justify-content:space-between;gap:24px}
+.cda-welcome-section-head h3,.cda-guidance-panel h3,.cda-submission-strip h3{margin-top:5px;font-family:"Bodoni Moda",Georgia,serif;font-size:25px;font-weight:500;color:#24211d}
+.cda-welcome-section-head>p{max-width:430px;color:#68635b;font-size:13px;line-height:1.7}
+.cda-stage-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.cda-stage-card{padding:17px 15px;background:#fffdf9;border:1px solid #dfd5c7;border-top:2px solid #c9a24a;min-height:142px}
+.cda-stage-card-top{display:flex;justify-content:space-between;align-items:center;color:#9b762f}
+.cda-stage-card-top span{font-size:10px;font-weight:700;letter-spacing:.12em}
+.cda-stage-card h4{margin-top:17px;font-family:"Bodoni Moda",Georgia,serif;font-size:19px;font-weight:500}
+.cda-stage-card p{margin-top:5px;color:#68635b;font-size:11px;line-height:1.55}
+.cda-guidance-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cda-guidance-panel{padding:25px;background:#fffdf9;border:1px solid #dfd5c7}
+.cda-guidance-title{display:flex;align-items:center;gap:10px;color:#9b762f}
+.cda-guidance-title h3{margin:0}
+.cda-guidance-panel ul{margin:17px 0 0;padding-left:19px;list-style:disc;color:#514c44;font-size:13px;line-height:1.9}
+.cda-guidance-panel-dark{background:#242321;color:#eee8dc;border-color:#242321}
+.cda-guidance-panel-dark h3{font-size:29px}
+.cda-guidance-panel-dark>p:not(.cda-eyebrow){color:#d0c9bd;font-size:13px;line-height:1.8}
+.cda-guidance-panel-dark .cda-guidance-note{margin-top:15px;padding-top:13px;border-top:1px solid #514b40;color:#b9ad98;font-size:11px}
+.cda-submission-strip{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px 27px;background:#eee7da;border-left:3px solid #c9a24a}
+.cda-submission-strip h3{font-size:22px}
+.cda-submission-strip>div:first-child>p:last-child{margin-top:6px;color:#625e58;font-size:12px;line-height:1.7}
+.cda-submission-mark{display:flex;flex-direction:column;align-items:center;gap:8px;color:#92702f;white-space:nowrap}
+.cda-submission-mark span{font-size:9px;letter-spacing:.15em;font-weight:700}
+.cda-welcome-bottom{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 0 14px}
+.cda-dont-show{display:flex;align-items:center;gap:9px;color:#625e58;font-size:12px}
+.cda-dont-show input{width:15px;height:15px;accent-color:#b58a3b}
+.cda-continue-button{background:#242321;color:#fff;border:1px solid #242321}
+@media(max-width:900px){.cda-stage-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.cda-welcome-hero{grid-template-columns:1fr .75fr}.cda-welcome-hero-copy{padding:30px}}
+@media(max-width:640px){.cda-welcome-hero{grid-template-columns:1fr}.cda-welcome-hero-art{min-height:190px}.cda-welcome-section-head,.cda-welcome-bottom,.cda-submission-strip{align-items:flex-start;flex-direction:column}.cda-stage-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cda-guidance-grid{grid-template-columns:1fr}.cda-welcome-hero h2{font-size:34px}.cda-welcome-section-head>p{margin-top:0}.cda-welcome-bottom{gap:14px}.cda-continue-button{width:100%}}
