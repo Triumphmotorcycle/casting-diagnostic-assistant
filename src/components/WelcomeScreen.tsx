@@ -30,7 +30,7 @@ export function WelcomeScreen({ onStartCase, onOpenCases, onDismiss, dontShowAga
             <button onClick={onOpenCases} className="cda-outline-button">Open my cases</button>
           </div>
         </div>
-        <div className="cda-welcome-hero-art" aria-label="Abstract molten precious metal and casting detail">
+        <div className="cda-welcome-hero-art" aria-label="Molten precious metal being poured into a jewellery investment flask">
           <div className="cda-art-ring cda-art-ring-one" />
           <div className="cda-art-ring cda-art-ring-two" />
           <div className="cda-art-pour" />
