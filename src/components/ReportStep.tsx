@@ -18,7 +18,9 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   castingCase: CastingCase;
+  update?: (patch: Partial<CastingCase>) => void;
   onBack: () => void;
+  onSubmitToRegister?: (castingCase: CastingCase) => Promise<{ caseRef?: string; error?: string }>;
 }
 
 const STATUS_LABEL: Record<RecommendationStatus, string> = {
