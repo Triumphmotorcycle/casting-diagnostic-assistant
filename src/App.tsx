@@ -93,7 +93,7 @@ export default function App() {
     setActiveId(null); setCastingCase(emptyCase()); setPhotoFiles([]); setStep('setup'); setView('editor'); setMessage('New case started. A reference number is assigned when you save it.'); setError('');
   };
   const openCase = (record: RegisterCase) => {
-    setActiveId(record.id); setCastingCase(record.data); setStep('setup'); setView(record.status === 'closed' || record.status === 'awaiting_review' || record.status === 'under_investigation' ? 'review' : 'editor');
+    setActiveId(record.id); setCastingCase(record.data); setStep('setup'); setView(record.status === 'closed' || record.status === 'awaiting_review' || record.status === 'under_investigation' || record.status === 'action_required' ? 'review' : 'editor');
     setMessage(''); setError('');
   };
 
