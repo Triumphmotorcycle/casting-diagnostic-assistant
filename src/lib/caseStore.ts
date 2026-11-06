@@ -1,6 +1,6 @@
 import { CastingCase } from '@/types/casting';
 
-export type CaseStatus = 'draft' | 'awaiting_review' | 'under_investigation' | 'closed';
+export type CaseStatus = 'draft' | 'awaiting_review' | 'under_investigation' | 'action_required' | 'closed';
 export interface RegisterCase {
   id: string;
   case_ref: string;
