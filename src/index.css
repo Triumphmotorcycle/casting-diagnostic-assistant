@@ -139,7 +139,7 @@ button.bg-teal-800,button.bg-teal-900{background:var(--tj-gold-btn)!important;co
 
 /* Replace the abstract hero artwork with a real jewellery-casting image. */
 .cda-welcome-hero-art{
- background-image:linear-gradient(90deg,rgba(24,21,18,.12),rgba(24,21,18,.02)),url("https://cdn.shopify.com/s/files/1/0654/3360/0047/files/Casting_the_Metal_Framework.png");
- background-size:cover;background-position:center 44%;
+ background-image:linear-gradient(90deg,rgba(24,21,18,.12),rgba(24,21,18,.02)),url("/casting-diagnostic-assistant/cda-splash-pour.webp");
+ background-size:cover;background-position:50% 50%;background-repeat:no-repeat;
 }
 .cda-welcome-hero-art:before,.cda-art-ring,.cda-art-pour,.cda-art-glow,.cda-welcome-hero-art>span{display:none!important}
