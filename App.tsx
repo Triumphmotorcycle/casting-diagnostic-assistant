@@ -274,7 +274,7 @@ export default function App() {
             />
           )}
           {step === "report" && (
-            <ReportStep castingCase={castingCase} update={update} onBack={() => setStep("trials")} onSubmitToRegister={handleSubmitToRegister} />
+            <ReportStep castingCase={castingCase} onBack={() => setStep("trials")} />
           )}
         </main>
 
