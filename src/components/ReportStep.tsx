@@ -20,6 +20,7 @@ interface Props {
   castingCase: CastingCase;
   update?: (patch: Partial<CastingCase>) => void;
   onBack: () => void;
+  readOnly?: boolean;
   onSubmitToRegister?: (castingCase: CastingCase) => Promise<{ caseRef?: string; error?: string }>;
 }
 
@@ -39,7 +40,7 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function ReportStep({ castingCase, onBack }: Props) {
+export function ReportStep({ castingCase, onBack, readOnly = false }: Props) {
   const hypotheses = useMemo(() => runDiagnosis(castingCase), [castingCase]);
   const [saved, setSaved] = useState(false);
   const { setup, alloy, investment, tree, defect } = castingCase;
@@ -301,9 +302,11 @@ export function ReportStep({ castingCase, onBack }: Props) {
           <Button variant="outline" onClick={handlePrint}>
             <Printer className="mr-2 h-4 w-4" /> Export / print report
           </Button>
-          <Button variant="ghost" onClick={onBack}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to trials
-          </Button>
+{!readOnly && (
+            <Button variant="ghost" onClick={onBack}>
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to trials
+            </Button>
+          )}
         </div>
 
         <Card className="border-slate-200 bg-slate-50 shadow-sm print:break-inside-avoid">
