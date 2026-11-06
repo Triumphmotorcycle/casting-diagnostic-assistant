@@ -6,33 +6,19 @@ import { AlignmentChart } from "@/components/AlignmentChart";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   ArrowLeft,
   Save,
   Printer,
   CheckCircle2,
   AlertTriangle,
-  UserCheck,
   ClipboardList,
-  Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
   castingCase: CastingCase;
-  update: (patch: Partial<CastingCase>) => void;
   onBack: () => void;
-  onSubmitToRegister: (castingCase: CastingCase) => Promise<{ caseRef?: string; error?: string }>;
 }
 
 const STATUS_LABEL: Record<RecommendationStatus, string> = {
@@ -51,18 +37,12 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function ReportStep({ castingCase, update, onBack, onSubmitToRegister }: Props) {
-  const [submitting, setSubmitting] = useState(false);
-  const [submittedRef, setSubmittedRef] = useState("");
-  const [submitError, setSubmitError] = useState("");
+export function ReportStep({ castingCase, onBack }: Props) {
   const hypotheses = useMemo(() => runDiagnosis(castingCase), [castingCase]);
   const [saved, setSaved] = useState(false);
-  const { setup, alloy, investment, tree, defect, review } = castingCase;
+  const { setup, alloy, investment, tree, defect } = castingCase;
   const note = alloyNote(alloy.composition);
   const lowConfidence = alloy.measurementConfidence !== "validated";
-
-  const setReview = (patch: Partial<CastingCase["review"]>) =>
-    update({ review: { ...review, ...patch } });
 
   const handleSave = () => {
     saveCase(castingCase);
@@ -72,31 +52,7 @@ export function ReportStep({ castingCase, update, onBack, onSubmitToRegister }: 
 
   const handlePrint = () => window.print();
 
-  const handleSubmitToRegister = async () => {
-    if (submitting || submittedRef) return;
-    setSubmitting(true);
-    setSubmitError("");
-    try {
-      const result = await onSubmitToRegister(castingCase);
-      if (result.error) setSubmitError(result.error);
-      else setSubmittedRef(result.caseRef || "submitted");
-    } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : "Could not submit this report.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
-  const approvalTone =
-    review.approvalStatus === "approved"
-      ? "border-teal-200 bg-teal-50 text-teal-800"
-      : review.approvalStatus === "submitted"
-        ? "border-sky-200 bg-sky-50 text-sky-800"
-        : review.approvalStatus === "revision-requested"
-          ? "border-amber-200 bg-amber-50 text-amber-800"
-          : "border-slate-200 bg-slate-100 text-slate-700";
-
-  const approvalBlocked = lowConfidence && review.approvalStatus === "approved";
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
@@ -114,8 +70,8 @@ export function ReportStep({ castingCase, update, onBack, onSubmitToRegister }: 
                   {setup.site || "Site not set"} · {setup.operative || "Operative not set"} · {setup.date}
                 </CardDescription>
               </div>
-              <Badge variant="outline" className={approvalTone}>
-                {review.approvalStatus}
+              <Badge variant="outline" className="border-slate-200 bg-slate-100 text-slate-700">
+                Diagnostic report
               </Badge>
             </div>
           </CardHeader>
@@ -317,133 +273,26 @@ export function ReportStep({ castingCase, update, onBack, onSubmitToRegister }: 
       </div>
 
       <div className="space-y-4">
-        <Card className="border-slate-200 shadow-sm print:break-inside-avoid">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-              <UserCheck className="h-4 w-4 text-teal-700" /> Remote review
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-600">Reviewer</Label>
-                <Input value={review.reviewer} onChange={(e) => setReview({ reviewer: e.target.value })} placeholder="Specialist name" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-600">Reviewed date</Label>
-                <Input type="date" value={review.reviewedDate} onChange={(e) => setReview({ reviewedDate: e.target.value })} />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-slate-600">Evidence still required</Label>
-              <Textarea
-                value={review.evidenceRequired}
-                rows={2}
-                placeholder="e.g. radiograph of shank, second temperature reading"
-                onChange={(e) => setReview({ evidenceRequired: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-slate-600">Next variable to change</Label>
-              <Input
-                value={review.nextVariable}
-                placeholder="e.g. Casting temperature only"
-                onChange={(e) => setReview({ nextVariable: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-slate-600">Recommendation status</Label>
-              <Select
-                value={review.recommendationStatus}
-                onValueChange={(v) => setReview({ recommendationStatus: v as RecommendationStatus })}
-              >
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="general-guidance">General guidance</SelectItem>
-                  <SelectItem value="experimental">Experimental</SelectItem>
-                  <SelectItem value="published-research">Published research</SelectItem>
-                  <SelectItem value="site-validated">Site-validated</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-slate-600">Approval status</Label>
-              <Select
-                value={review.approvalStatus}
-                onValueChange={(v) => setReview({ approvalStatus: v as CastingCase["review"]["approvalStatus"] })}
-              >
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="submitted">Submitted for review</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="revision-requested">Revision requested</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-slate-600">Reviewer comments</Label>
-              <Textarea
-                value={review.comments}
-                rows={4}
-                placeholder="Specialist observations, requested further evidence, approved next step"
-                onChange={(e) => setReview({ comments: e.target.value })}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {approvalBlocked && (
-          <Card className="border-rose-300 bg-rose-50 shadow-sm print:break-inside-avoid">
-            <CardContent className="flex items-center gap-3 p-4">
-              <AlertTriangle className="h-5 w-5 shrink-0 text-rose-600" />
-              <div className="text-sm text-rose-900">
-                <p className="font-semibold">Approval blocked</p>
-                <p className="mt-1 text-rose-900/80">
-                  This case depends on an unvalidated casting-temperature measurement. It cannot be marked approved
-                  until the measurement is validated or the recommendation is reclassified as experimental.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {lowConfidence && !approvalBlocked && (
+        {lowConfidence && (
           <Card className="border-amber-300 bg-amber-50 shadow-sm print:break-inside-avoid">
             <CardContent className="flex gap-3 p-4">
               <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" />
               <p className="text-sm text-amber-900">
-                Temperature measurement is not fully validated. Flag this in the review before approving any process
-                change that depends on it.
+                Temperature measurement is not fully validated. Any process change that depends on it must be checked by the responsible technical specialist.
               </p>
             </CardContent>
           </Card>
         )}
 
         <div className="flex flex-col gap-2 print:hidden">
-          {submitError && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{submitError}</p>}
-          {submittedRef ? (
-            <div role="status" className="rounded-lg border border-teal-200 bg-teal-50 p-3 text-sm text-teal-900">
-              Submitted to the central Workshop System as <strong>{submittedRef}</strong>.
-            </div>
-          ) : (
-            <Button onClick={handleSubmitToRegister} disabled={submitting} className="bg-teal-800 hover:bg-teal-900">
-              <Send className="mr-2 h-4 w-4" /> {submitting ? "Submitting…" : "Submit to central workshop"}
-            </Button>
-          )}
           <Button onClick={handleSave} className="bg-teal-700 hover:bg-teal-800">
             {saved ? (
               <>
-                <CheckCircle2 className="mr-2 h-4 w-4" /> Saved
+                <CheckCircle2 className="mr-2 h-4 w-4 text-teal-600" /> Saved
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> Save case
+                <Save className="mr-2 h-4 w-4" /> Save report
               </>
             )}
           </Button>
@@ -459,8 +308,7 @@ export function ReportStep({ castingCase, update, onBack, onSubmitToRegister }: 
           <CardContent className="flex items-center gap-3 p-4 text-xs text-slate-500">
             <ClipboardList className="h-4 w-4 shrink-0 text-slate-400" />
             <span>
-              This report is a decision-support record. The responsible technical specialist remains accountable for
-              approving new process limits and validating changes before they become standard production practice.
+              This report is a decision-support record. Formal review, corrective actions and approval are recorded in Workshop Hub.
             </span>
           </CardContent>
         </Card>
