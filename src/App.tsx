@@ -34,7 +34,7 @@ export default function App() {
   const [castingCase, setCastingCase] = useState<CastingCase>(() => emptyCase());
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [step, setStep] = useState<StepId>('setup');
-  const [view, setView] = useState<'register' | 'editor' | 'review'>('register');
+  const [view, setView] = useState<'register' | 'editor' | 'review' | 'submitted-report'>('register');
   const [filter, setFilter] = useState<CaseStatus | 'all'>('all');
   const [query, setQuery] = useState('');
   const [busy, setBusy] = useState(false);
@@ -231,7 +231,14 @@ export default function App() {
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Central case status</p><span className={cn('mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold', STATUS_CLASS[activeRecord.status])}>{STATUS_LABEL[activeRecord.status]}</span></div>
       <CaseUpdatesPanel caseId={activeRecord.id} />
       <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">This is a read-only view of your submitted report and its central workshop history. Formal review decisions and corrective actions are managed in Workshop Hub.</p>
-      <div className="flex flex-wrap gap-2"><button onClick={()=>{setCastingCase(activeRecord.data);setStep('report');setView('editor');}} className="rounded-lg border px-3 py-2 text-sm font-semibold">View full report</button><button onClick={()=>setView('register')} className="text-sm font-medium text-teal-800 underline">Back to submitted reports</button></div>
+      <div className="flex flex-wrap gap-2"><button onClick={()=>{setCastingCase(activeRecord.data);setView('submitted-report');}} className="rounded-lg border px-3 py-2 text-sm font-semibold">View full report</button><button onClick={()=>setView('register')} className="text-sm font-medium text-teal-800 underline">Back to submitted reports</button></div>
+    </section>}
+    {!showWelcome && view === 'submitted-report' && activeRecord && <section className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm print:hidden">
+        <div><p className="text-xs font-semibold uppercase tracking-wide text-teal-700">Submitted report</p><h2 className="text-lg font-bold text-slate-900">{activeRecord.case_ref}</h2></div>
+        <button onClick={() => setView('review')} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold hover:bg-slate-50">Back to case overview</button>
+      </div>
+      <main><ReportStep castingCase={activeRecord.data} readOnly onBack={() => setView('review')} /></main>
     </section>}
     <footer className="pb-8 text-center text-xs text-slate-400">Decision-support only. Technical changes must be validated and approved by the responsible specialist.</footer>
   </div></div>;
