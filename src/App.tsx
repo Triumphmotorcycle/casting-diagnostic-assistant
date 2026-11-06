@@ -19,8 +19,8 @@ const STEPS: { id: StepId; label: string }[] = [
   { id: 'setup', label: 'Setup' }, { id: 'parameters', label: 'Parameters' }, { id: 'defect', label: 'Defect' },
   { id: 'diagnosis', label: 'Diagnosis' }, { id: 'trials', label: 'Trials' }, { id: 'report', label: 'Report' },
 ];
-const STATUS_LABEL: Record<CaseStatus, string> = { draft: 'Draft', awaiting_review: 'Awaiting review', under_investigation: 'Under investigation', closed: 'Closed' };
-const STATUS_CLASS: Record<CaseStatus, string> = { draft: 'bg-slate-100 text-slate-700', awaiting_review: 'bg-amber-100 text-amber-800', under_investigation: 'bg-blue-100 text-blue-800', closed: 'bg-emerald-100 text-emerald-800' };
+const STATUS_LABEL: Record<CaseStatus, string> = { draft: 'Draft', awaiting_review: 'Awaiting review', under_investigation: 'Under investigation', action_required: 'Further work required', closed: 'Closed' };
+const STATUS_CLASS: Record<CaseStatus, string> = { draft: 'bg-slate-100 text-slate-700', awaiting_review: 'bg-amber-100 text-amber-800', under_investigation: 'bg-blue-100 text-blue-800', action_required: 'bg-amber-100 text-amber-800', closed: 'bg-emerald-100 text-emerald-800' };
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -45,7 +45,7 @@ export default function App() {
 
   const refreshCases = useCallback(async () => {
     if (!supabase) return;
-    const { data, error: fetchError } = await supabase.from('workshop_cases').select('id, case_number, case_ref, site_name, title, status, submitted_at, submitted_by, original_submission, is_shared').order('case_number', { ascending: false });
+    const { data, error: fetchError } = await supabase.from('workshop_cases').select('id, case_number, case_ref, site_name, title, status, submitted_at, submitted_by, original_submission, is_shared').eq('submitted_by', user?.id ?? '').order('case_number', { ascending: false });
     if (fetchError) throw fetchError;
     const mapped = (data ?? []).map((row: any) => {
       const submitted = row.original_submission ?? {};
@@ -57,11 +57,11 @@ export default function App() {
         ...diagnosticData,
         setup: { ...diagnosticData.setup, caseRef }
       };
-      const status: CaseStatus = row.status === 'closed' ? 'closed' : row.status === 'under_investigation' ? 'under_investigation' : 'awaiting_review';
+      const status: CaseStatus = row.status === 'closed' ? 'closed' : row.status === 'action_required' ? 'action_required' : row.status === 'under_review' || row.status === 'under_investigation' ? 'under_investigation' : 'awaiting_review';
       return { id: row.id, case_ref: caseRef, status, data: dataWithReference, created_at: row.submitted_at, updated_at: row.submitted_at, created_by: row.submitted_by, submitted_at: row.submitted_at, reviewer_notes: '', corrective_action: '', verification_result: '', closed_at: null } as RegisterCase;
     });
     setCases(mapped);
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     if (!supabase) { setAuthReady(true); return; }
@@ -94,7 +94,7 @@ export default function App() {
   };
   const openCase = (record: RegisterCase) => {
     setActiveId(record.id); setCastingCase(record.data); setStep('setup'); setView(record.status === 'closed' || record.status === 'awaiting_review' || record.status === 'under_investigation' ? 'review' : 'editor');
-    setReviewerNotes(record.reviewer_notes ?? ''); setCorrectiveAction(record.corrective_action ?? ''); setVerificationResult(record.verification_result ?? ''); setMessage(''); setError('');
+    setMessage(''); setError('');
   };
 
   const saveDraft = async () => {
@@ -194,9 +194,9 @@ export default function App() {
   return <div className="min-h-screen bg-slate-100 print:bg-white"><div className="mx-auto max-w-7xl space-y-5 p-4 lg:p-8 print:max-w-none print:p-0">
     <header className="cda-header flex flex-wrap items-center justify-between gap-4 rounded-2xl px-6 py-5 text-white"><div className="cda-header-brand"><img src="/casting-diagnostic-assistant/logo.png" alt="TJ Gold & Diamond" /><div><h1 className="mt-1 text-2xl font-bold">Casting Diagnostic Assistant</h1><p className="mt-1 text-sm">Diagnostic reporting tool · Signed in as {user.email}</p></div></div><button onClick={() => supabase?.auth.signOut()} className="flex items-center gap-2 rounded-lg border border-white/30 px-3 py-2 text-sm hover:bg-white/10"><LogOut size={16}/> Sign out</button></header>
     {(error || message) && <div className={cn('flex items-start gap-2 rounded-xl p-3 text-sm', error ? 'bg-red-50 text-red-800' : 'bg-teal-50 text-teal-900')}>{error ? <AlertCircle size={18}/> : <CheckCircle2 size={18}/>}<span>{error || message}</span><button className="ml-auto underline" onClick={() => {setError('');setMessage('');}}>Dismiss</button></div>}
-    <nav className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm"><button onClick={() => { setShowWelcome(false); setView('register'); }} className={cn('flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold', view === 'register' && !showWelcome ? 'bg-teal-800 text-white' : 'text-slate-600 hover:bg-slate-100')}><ClipboardList size={16}/> Case Resolution Centre</button><button onClick={() => setShowWelcome(true)} className={cn('rounded-xl px-4 py-2 text-sm font-semibold', showWelcome ? 'bg-teal-800 text-white' : 'text-slate-600 hover:bg-slate-100')}>Guidance</button><button onClick={beginNewCase} className="flex items-center gap-2 rounded-xl bg-teal-50 px-4 py-2 text-sm font-semibold text-teal-900 hover:bg-teal-100"><Plus size={16}/> New Case</button>{view !== 'register' && <span className="ml-auto self-center text-sm text-slate-500">{activeRecord?.case_ref ?? 'Unsaved new case'}</span>}</nav>
+    <nav className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm"><button onClick={() => { setShowWelcome(false); setView('register'); }} className={cn('flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold', view === 'register' && !showWelcome ? 'bg-teal-800 text-white' : 'text-slate-600 hover:bg-slate-100')}><ClipboardList size={16}/> My Cases</button><button onClick={() => setShowWelcome(true)} className={cn('rounded-xl px-4 py-2 text-sm font-semibold', showWelcome ? 'bg-teal-800 text-white' : 'text-slate-600 hover:bg-slate-100')}>Guidance</button><button onClick={beginNewCase} className="flex items-center gap-2 rounded-xl bg-teal-50 px-4 py-2 text-sm font-semibold text-teal-900 hover:bg-teal-100"><Plus size={16}/> New Case</button>{view !== 'register' && <span className="ml-auto self-center text-sm text-slate-500">{activeRecord?.case_ref ?? 'Unsaved new case'}</span>}</nav>
     {showWelcome && <WelcomeScreen onStartCase={() => { dismissWelcome(); beginNewCase(); }} onOpenCases={() => { dismissWelcome(); setView('register'); }} onDismiss={dismissWelcome} dontShowAgain={dontShowAgain} onDontShowAgain={setDontShowAgain} />}
-    {!showWelcome && view === 'register' && <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-xl font-bold text-slate-900">Case Resolution Centre</h2><p className="mt-1 text-sm text-slate-500">Submitted reports are visible in the central Workshop System register. Use this tool to prepare and submit a diagnostic report.</p></div><button onClick={() => refreshCases().catch((e: Error) => setError(e.message))} className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"><RefreshCw size={15}/> Refresh</button></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{(['draft','awaiting_review','under_investigation','closed'] as CaseStatus[]).map(status => <button key={status} onClick={() => setFilter(filter === status ? 'all' : status)} className={cn('rounded-xl border p-4 text-left', filter === status ? 'border-teal-700 ring-2 ring-teal-100' : 'border-slate-200')}><span className={cn('inline-flex rounded-full px-2 py-1 text-xs font-semibold', STATUS_CLASS[status])}>{STATUS_LABEL[status]}</span><p className="mt-2 text-2xl font-bold text-slate-900">{cases.filter(c => c.status === status).length}</p></button>)}</div><div className="flex flex-wrap gap-3"><div className="relative min-w-[220px] flex-1"><Search size={16} className="absolute left-3 top-3 text-slate-400"/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search reference, site, operative or defect…" className="w-full rounded-lg border border-slate-300 py-2.5 pl-9 pr-3 text-sm"/></div><select value={filter} onChange={e => setFilter(e.target.value as CaseStatus | 'all')} className="rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="all">All statuses</option><option value="draft">Draft</option><option value="awaiting_review">Awaiting review</option><option value="under_investigation">Under investigation</option><option value="closed">Closed</option></select></div><div className="overflow-x-auto"><table className="w-full min-w-[720px] border-collapse text-left text-sm"><thead><tr className="border-b text-xs uppercase tracking-wide text-slate-500"><th className="p-3">Reference / date</th><th className="p-3">Site / operative</th><th className="p-3">Defect</th><th className="p-3">Status</th><th className="p-3">Updated</th><th className="p-3">Action</th></tr></thead><tbody>{filtered.map(record => <tr key={record.id} className="border-b border-slate-100 hover:bg-slate-50"><td className="p-3"><span className="font-bold text-slate-900">{record.case_ref}</span><span className="mt-1 block text-xs text-slate-500">{record.data?.setup?.date ?? '—'}</span></td><td className="p-3">{record.data?.setup?.site || '—'}<span className="mt-1 block text-xs text-slate-500">{record.data?.setup?.operative || '—'}</span></td><td className="p-3">{(record.data?.defect?.types ?? []).join(', ') || record.data?.defect?.location || 'Not specified'}</td><td className="p-3"><span className={cn('rounded-full px-2 py-1 text-xs font-semibold', STATUS_CLASS[record.status])}>{STATUS_LABEL[record.status]}</span></td><td className="p-3 text-slate-500">{new Date(record.updated_at).toLocaleDateString()}</td><td className="p-3"><button onClick={() => openCase(record)} className="rounded-lg border border-slate-300 px-3 py-1.5 font-medium hover:bg-white">{record.status === 'draft' ? 'Open draft' : 'Review case'}</button></td></tr>)}</tbody></table>{filtered.length === 0 && <div className="p-10 text-center text-sm text-slate-500">No cases match this view yet.</div>}</div></section>}
+    {!showWelcome && view === 'register' && <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-xl font-bold text-slate-900">My Workshop Cases</h2><p className="mt-1 text-sm text-slate-500">Submitted reports are visible in the central Workshop System register. Use this tool to prepare and submit a diagnostic report.</p></div><button onClick={() => refreshCases().catch((e: Error) => setError(e.message))} className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"><RefreshCw size={15}/> Refresh</button></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{(['draft','awaiting_review','under_investigation','action_required','closed'] as CaseStatus[]).map(status => <button key={status} onClick={() => setFilter(filter === status ? 'all' : status)} className={cn('rounded-xl border p-4 text-left', filter === status ? 'border-teal-700 ring-2 ring-teal-100' : 'border-slate-200')}><span className={cn('inline-flex rounded-full px-2 py-1 text-xs font-semibold', STATUS_CLASS[status])}>{STATUS_LABEL[status]}</span><p className="mt-2 text-2xl font-bold text-slate-900">{cases.filter(c => c.status === status).length}</p></button>)}</div><div className="flex flex-wrap gap-3"><div className="relative min-w-[220px] flex-1"><Search size={16} className="absolute left-3 top-3 text-slate-400"/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search reference, site, operative or defect…" className="w-full rounded-lg border border-slate-300 py-2.5 pl-9 pr-3 text-sm"/></div><select value={filter} onChange={e => setFilter(e.target.value as CaseStatus | 'all')} className="rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="all">All statuses</option><option value="draft">Draft</option><option value="awaiting_review">Awaiting review</option><option value="under_investigation">Under investigation</option><option value="action_required">Further work required</option><option value="closed">Closed</option></select></div><div className="overflow-x-auto"><table className="w-full min-w-[720px] border-collapse text-left text-sm"><thead><tr className="border-b text-xs uppercase tracking-wide text-slate-500"><th className="p-3">Reference / date</th><th className="p-3">Site / operative</th><th className="p-3">Defect</th><th className="p-3">Status</th><th className="p-3">Updated</th><th className="p-3">Action</th></tr></thead><tbody>{filtered.map(record => <tr key={record.id} className="border-b border-slate-100 hover:bg-slate-50"><td className="p-3"><span className="font-bold text-slate-900">{record.case_ref}</span><span className="mt-1 block text-xs text-slate-500">{record.data?.setup?.date ?? '—'}</span></td><td className="p-3">{record.data?.setup?.site || '—'}<span className="mt-1 block text-xs text-slate-500">{record.data?.setup?.operative || '—'}</span></td><td className="p-3">{(record.data?.defect?.types ?? []).join(', ') || record.data?.defect?.location || 'Not specified'}</td><td className="p-3"><span className={cn('rounded-full px-2 py-1 text-xs font-semibold', STATUS_CLASS[record.status])}>{STATUS_LABEL[record.status]}</span></td><td className="p-3 text-slate-500">{new Date(record.updated_at).toLocaleDateString()}</td><td className="p-3"><button onClick={() => openCase(record)} className="rounded-lg border border-slate-300 px-3 py-1.5 font-medium hover:bg-white">{record.status === 'draft' ? 'Open draft' : 'View case'}</button></td></tr>)}</tbody></table>{filtered.length === 0 && <div className="p-10 text-center text-sm text-slate-500">No cases match this view yet.</div>}</div></section>}
     {!showWelcome && view === 'editor' && (
       <>
         <div className="print:hidden"><CaseHeader castingCase={castingCase} update={update} /></div>
@@ -218,7 +218,7 @@ export default function App() {
           {step === 'defect' && <DefectStep castingCase={castingCase} update={update} onBack={() => setStep('parameters')} onNext={() => setStep('diagnosis')} photoFiles={photoFiles} onPhotoFilesChange={setPhotoFiles} />}
           {step === 'diagnosis' && <DiagnosisStep castingCase={castingCase} onBack={() => setStep('defect')} onNext={() => setStep('trials')} />}
           {step === 'trials' && <TrialStep castingCase={castingCase} update={update} onBack={() => setStep('diagnosis')} onNext={() => setStep('report')} />}
-          {step === 'report' && <ReportStep castingCase={castingCase} update={update} onBack={() => setStep('trials')} />}
+          {step === 'report' && <ReportStep castingCase={castingCase} onBack={() => setStep('trials')} />}
         </main>
       </>
     )}
@@ -228,9 +228,116 @@ export default function App() {
         <div className="rounded-xl bg-slate-50 p-4"><h3 className="font-semibold">Reported defect</h3><p className="mt-2 text-sm">{activeRecord.data.defect.types.join(', ') || 'Not specified'}</p><p className="mt-1 text-sm text-slate-600">Location: {activeRecord.data.defect.location || 'Not specified'}</p><p className="mt-2 text-sm text-slate-600">Operative: {activeRecord.data.setup.operative || 'Not specified'}</p></div>
         <div className="rounded-xl bg-slate-50 p-4"><h3 className="font-semibold">Casting setup</h3><p className="mt-2 text-sm">{activeRecord.data.setup.machineMake} {activeRecord.data.setup.machineModel}</p><p className="mt-1 text-sm text-slate-600">Metal: {activeRecord.data.alloy.metal} · {activeRecord.data.alloy.composition || 'Composition not specified'}</p><p className="mt-1 text-sm text-slate-600">Investment: {activeRecord.data.investment.manufacturer} {activeRecord.data.investment.product}</p></div>
       </div>
-      <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">This report is stored in Workshop System Central. Formal review, investigation and closure are managed in the central Hub.</p>
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Central case status</p><span className={cn('mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold', STATUS_CLASS[activeRecord.status])}>{STATUS_LABEL[activeRecord.status]}</span></div>
+      <CaseUpdatesPanel caseId={activeRecord.id} />
+      <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">This is a read-only view of your submitted report and its central workshop history. Formal review decisions and corrective actions are managed in Workshop Hub.</p>
       <div className="flex flex-wrap gap-2"><button onClick={()=>{setCastingCase(activeRecord.data);setStep('report');setView('editor');}} className="rounded-lg border px-3 py-2 text-sm font-semibold">View full report</button><button onClick={()=>setView('register')} className="text-sm font-medium text-teal-800 underline">Back to submitted reports</button></div>
     </section>}
     <footer className="pb-8 text-center text-xs text-slate-400">Decision-support only. Technical changes must be validated and approved by the responsible specialist.</footer>
   </div></div>;
 }
+
+type CaseActivityEntry = {
+  id: string;
+  activity_type: string;
+  title: string;
+  details: string;
+  results: string | null;
+  created_at: string;
+};
+
+type FormalReviewEntry = {
+  id: string;
+  decision: string;
+  reviewer_notes: string;
+  corrective_action: string | null;
+  verification_result: string | null;
+  created_at: string;
+};
+
+function CaseUpdatesPanel({ caseId }: { caseId: string }) {
+  const [activities, setActivities] = useState<CaseActivityEntry[]>([]);
+  const [reviews, setReviews] = useState<FormalReviewEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const loadUpdates = useCallback(async () => {
+    if (!supabase) return;
+    setLoading(true);
+    setError('');
+    const [activityResult, reviewResult] = await Promise.all([
+      supabase.from('case_activity')
+        .select('id, activity_type, title, details, results, created_at')
+        .eq('case_id', caseId)
+        .order('created_at', { ascending: false }),
+      supabase.from('workshop_case_reviews')
+        .select('id, decision, reviewer_notes, corrective_action, verification_result, created_at')
+        .eq('case_id', caseId)
+        .order('created_at', { ascending: false })
+    ]);
+
+    if (activityResult.error || reviewResult.error) {
+      setError([activityResult.error?.message, reviewResult.error?.message].filter(Boolean).join(' · '));
+    }
+    setActivities((activityResult.data ?? []) as CaseActivityEntry[]);
+    setReviews((reviewResult.data ?? []) as FormalReviewEntry[]);
+    setLoading(false);
+  }, [caseId]);
+
+  useEffect(() => { void loadUpdates(); }, [loadUpdates]);
+
+  const activityLabel = (type: string) => ({
+    evidence: 'Evidence / observation',
+    trial: 'Trial / corrective action test',
+    technical_advice: 'Technical advice',
+    review: 'Workshop update',
+    status_change: 'Status change'
+  } as Record<string, string>)[type] ?? 'Case activity';
+
+  return (
+    <section className="space-y-4 rounded-xl border border-slate-200 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold text-slate-900">Workshop updates & review history</h3>
+          <p className="mt-1 text-xs text-slate-500">Updates are read directly from the shared central case record.</p>
+        </div>
+        <button onClick={() => void loadUpdates()} disabled={loading} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold disabled:opacity-50">
+          <RefreshCw size={13} className="mr-1 inline" />{loading ? 'Refreshing…' : 'Refresh updates'}
+        </button>
+      </div>
+      {error && <p role="alert" className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">Some updates could not be loaded: {error}</p>}
+      {loading ? <p className="text-sm text-slate-500">Loading central case history…</p> : (
+        <>
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-slate-800">Workshop activity</h4>
+            {activities.length === 0 ? <p className="text-sm text-slate-500">No workshop activity entries have been added yet.</p> : activities.map(item => (
+              <article key={item.id} className="rounded-lg border border-slate-200 bg-white p-3">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div><span className="text-xs font-semibold uppercase tracking-wide text-teal-800">{activityLabel(item.activity_type)}</span><h5 className="mt-1 font-semibold text-slate-900">{item.title}</h5></div>
+                  <time className="text-xs text-slate-500">{new Date(item.created_at).toLocaleString()}</time>
+                </div>
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{item.details}</p>
+                {item.results && <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700"><strong>Results:</strong> {item.results}</p>}
+              </article>
+            ))}
+          </div>
+          <div className="space-y-3 border-t border-slate-200 pt-4">
+            <h4 className="text-sm font-semibold text-slate-800">Formal review decisions</h4>
+            {reviews.length === 0 ? <p className="text-sm text-slate-500">No formal review has been recorded yet.</p> : reviews.map(item => (
+              <article key={item.id} className="rounded-lg border border-slate-200 bg-white p-3">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <h5 className="font-semibold text-slate-900">{item.decision === 'action_required' ? 'Further work required' : item.decision === 'approved_for_closure' ? 'Approved for closure' : item.decision.replace(/_/g, ' ')}</h5>
+                  <time className="text-xs text-slate-500">{new Date(item.created_at).toLocaleString()}</time>
+                </div>
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{item.reviewer_notes}</p>
+                {item.corrective_action && <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700"><strong>Required action:</strong> {item.corrective_action}</p>}
+                {item.verification_result && <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700"><strong>Verification:</strong> {item.verification_result}</p>}
+              </article>
+            ))}
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
