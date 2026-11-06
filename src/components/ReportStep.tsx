@@ -20,6 +20,7 @@ interface Props {
   castingCase: CastingCase;
   update?: (patch: Partial<CastingCase>) => void;
   onBack: () => void;
+  backLabel?: string;
   onSubmitToRegister?: (castingCase: CastingCase) => Promise<{ caseRef?: string; error?: string }>;
 }
 
@@ -39,7 +40,7 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function ReportStep({ castingCase, onBack }: Props) {
+export function ReportStep({ castingCase, onBack, backLabel = 'Back to trials' }: Props) {
   const hypotheses = useMemo(() => runDiagnosis(castingCase), [castingCase]);
   const [saved, setSaved] = useState(false);
   const { setup, alloy, investment, tree, defect } = castingCase;
@@ -302,7 +303,7 @@ export function ReportStep({ castingCase, onBack }: Props) {
             <Printer className="mr-2 h-4 w-4" /> Export / print report
           </Button>
           <Button variant="ghost" onClick={onBack}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to trials
+            <ArrowLeft className="mr-2 h-4 w-4" /> {backLabel}
           </Button>
         </div>
 
