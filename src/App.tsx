@@ -219,6 +219,7 @@ export default function App() {
           {step === 'diagnosis' && <DiagnosisStep castingCase={castingCase} onBack={() => setStep('defect')} onNext={() => setStep('trials')} />}
           {step === 'trials' && <TrialStep castingCase={castingCase} update={update} onBack={() => setStep('diagnosis')} onNext={() => setStep('report')} />}
           {step === 'report' && <ReportStep castingCase={castingCase} onBack={() => setStep('trials')} />}
+          {step === 'report' && activeRecord && <CaseEvidenceGallery caseId={activeRecord.id} />}
         </main>
       </>
     )}
@@ -230,11 +231,90 @@ export default function App() {
       </div>
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Central case status</p><span className={cn('mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold', STATUS_CLASS[activeRecord.status])}>{STATUS_LABEL[activeRecord.status]}</span></div>
       <CaseUpdatesPanel caseId={activeRecord.id} />
+      <CaseEvidenceGallery caseId={activeRecord.id} />
       <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">This is a read-only view of your submitted report and its central workshop history. Formal review decisions and corrective actions are managed in Workshop Hub.</p>
       <div className="flex flex-wrap gap-2"><button onClick={()=>{setCastingCase(activeRecord.data);setStep('report');setView('editor');}} className="rounded-lg border px-3 py-2 text-sm font-semibold">View full report</button><button onClick={()=>setView('register')} className="text-sm font-medium text-teal-800 underline">Back to submitted reports</button></div>
     </section>}
     <footer className="pb-8 text-center text-xs text-slate-400">Decision-support only. Technical changes must be validated and approved by the responsible specialist.</footer>
   </div></div>;
+}
+
+
+function CaseEvidenceGallery({ caseId }: { caseId: string }) {
+  const [photos, setPhotos] = useState<{ id: string; url: string; filename: string; caption: string; section: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    async function loadPhotos() {
+      if (!supabase) return;
+      setLoading(true);
+      setError('');
+      const { data, error: queryError } = await supabase
+        .from('workshop_case_evidence')
+        .select('id, evidence_type, content')
+        .eq('case_id', caseId)
+        .in('evidence_type', ['photo', 'activity_photo']);
+      if (queryError) {
+        if (active) { setError(queryError.message); setPhotos([]); setLoading(false); }
+        return;
+      }
+      const resolved: { id: string; url: string; filename: string; caption: string; section: string }[] = [];
+      const failures: string[] = [];
+      for (const row of data ?? []) {
+        const item = row.content as { bucket?: string; path?: string; filename?: string; caption?: string } | null;
+        if (!item?.path) continue;
+        const { data: signed, error: signError } = await supabase.storage
+          .from(item.bucket || 'workshop-case-photos')
+          .createSignedUrl(item.path, 300);
+        if (signError || !signed?.signedUrl) {
+          failures.push(`${item.filename || 'Photograph'}: ${signError?.message || 'No viewing link was returned.'}`);
+          continue;
+        }
+        resolved.push({
+          id: row.id,
+          url: signed.signedUrl,
+          filename: item.filename || 'Case photograph',
+          caption: item.caption || '',
+          section: row.evidence_type === 'activity_photo' ? 'Workshop update' : 'Original submission'
+        });
+      }
+      if (active) {
+        setPhotos(resolved);
+        if (failures.length) setError(failures.join(' · '));
+        setLoading(false);
+      }
+    }
+    void loadPhotos();
+    return () => { active = false; };
+  }, [caseId]);
+
+  return (
+    <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4">
+      <div>
+        <h3 className="font-semibold text-slate-900">Case photographs</h3>
+        <p className="mt-1 text-xs text-slate-500">Photographs submitted with the original report and attached to later workshop updates.</p>
+      </div>
+      {loading ? <p className="text-sm text-slate-500">Loading case photographs…</p>
+        : error && photos.length === 0 ? <p role="alert" className="text-sm text-amber-800">Photographs could not be loaded: {error}</p>
+        : photos.length === 0 ? <p className="text-sm text-slate-500">No photographs are attached to this case.</p>
+        : <>
+          {error && <p role="alert" className="text-xs text-amber-800">Some photographs could not be opened: {error}</p>}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {photos.map(photo => (
+              <a key={photo.id} href={photo.url} target="_blank" rel="noreferrer" className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50 text-slate-800">
+                <img src={photo.url} alt={photo.caption || photo.filename} loading="lazy" className="h-44 w-full bg-slate-100 object-cover" />
+                <div className="p-3">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-teal-800">{photo.section}</span>
+                  <p className="mt-1 break-words text-sm font-medium">{photo.caption || photo.filename}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </>}
+    </section>
+  );
 }
 
 type CaseActivityEntry = {
