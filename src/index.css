@@ -122,7 +122,7 @@ button.bg-teal-800,button.bg-teal-900{background:var(--tj-gold-btn)!important;co
 .cda-guidance-title h3{margin:0}
 .cda-guidance-panel ul{margin:17px 0 0;padding-left:19px;list-style:disc;color:#514c44;font-size:13px;line-height:1.9}
 .cda-guidance-panel-dark{background:#242321;color:#eee8dc;border-color:#242321}
-.cda-guidance-panel-dark h3{font-size:29px}
+.cda-guidance-panel-dark h3{font-size:29px;color:#d9b45d}
 .cda-guidance-panel-dark>p:not(.cda-eyebrow){color:#d0c9bd;font-size:13px;line-height:1.8}
 .cda-guidance-panel-dark .cda-guidance-note{margin-top:15px;padding-top:13px;border-top:1px solid #514b40;color:#b9ad98;font-size:11px}
 .cda-submission-strip{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px 27px;background:#eee7da;border-left:3px solid #c9a24a}
