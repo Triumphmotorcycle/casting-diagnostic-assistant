@@ -83,12 +83,17 @@ export interface Investment {
   previousIssues: string;
 }
 
+export type SprueShape = "straight" | "flared-round" | "flat-round-flare" | "square" | "acute-almond" | "tapered" | "combination" | "unknown";
+export type SprueConnectionRestriction = "consistent" | "narrowed" | "shaped" | "unknown";
+
 export interface Tree {
   treeType: string;
   totalMass: string;
   componentCount: string;
   componentMass: string;
   sprueDiameter: string;
+  sprueShape: SprueShape;
+  connectionRestriction: SprueConnectionRestriction;
   branchDiameter: string;
   gateDimensions: string;
   gateCount: string;

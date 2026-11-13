@@ -115,6 +115,8 @@ export function runDiagnosis(c: CastingCase): Hypothesis[] {
         supporting: [
           longPath ? "Flow path recorded as long or complex." : "Flow path noted.",
           tree.gateDimensions ? `Gate dimensions: ${tree.gateDimensions}.` : "Gate dimensions not recorded.",
+          tree.sprueShape && tree.sprueShape !== "unknown" ? `Reported sprue profile: ${tree.sprueShape}.` : "Sprue profile not recorded.",
+          tree.connectionRestriction === "narrowed" ? "Sprue was reported as narrowed or pinched at the component connection." : tree.connectionRestriction === "shaped" ? "Sprue was deliberately reduced or shaped at the component connection." : tree.connectionRestriction === "consistent" ? "No reduction at the component connection was reported." : "Connection profile at the component not established.",
           unfavourable ? "Component orientation is unfavourable." : "Orientation recorded.",
         ],
         conflicting: ["If filling improves with superheat alone, geometry is less likely the dominant cause."],
@@ -229,6 +231,8 @@ export function runDiagnosis(c: CastingCase): Hypothesis[] {
           ? "Dendritic or branched morphology is consistent with shrinkage."
           : "Shrinkage porosity reported.",
         tree.transitions ? `Section transitions: ${tree.transitions}.` : "Section transitions not recorded.",
+        tree.sprueShape && tree.sprueShape !== "unknown" ? `Reported sprue profile: ${tree.sprueShape}.` : "Sprue profile not recorded.",
+        tree.connectionRestriction === "narrowed" ? "A narrowed or pinched component connection may restrict liquid feeding." : tree.connectionRestriction === "shaped" ? "A deliberately shaped or reduced component connection is recorded and should be assessed in context." : tree.connectionRestriction === "consistent" ? "No local reduction at the component connection was reported." : "The component connection profile is unknown.",
         unfavourable ? "Component position is unfavourable for feeding." : "Component position recorded.",
       ],
       conflicting: [
