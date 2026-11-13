@@ -92,6 +92,8 @@ export interface Tree {
   componentCount: string;
   componentMass: string;
   sprueDiameter: string;
+  sprueCount: string;
+  spruePlacement: string;
   sprueShape: SprueShape;
   connectionRestriction: SprueConnectionRestriction;
   branchDiameter: string;

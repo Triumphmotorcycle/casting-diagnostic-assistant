@@ -295,7 +295,9 @@ export function ReworkedSetupStep({ castingCase, update, onNext }: Props) {
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Number of sprues" value={castingCase.tree.sprueCount} onChange={(v) => update({ tree: { ...castingCase.tree, sprueCount: v } })} placeholder="e.g. 1, 2, 3" />
               <Field label="Main sprue diameter" value={castingCase.tree.sprueDiameter} onChange={(v) => update({ tree: { ...castingCase.tree, sprueDiameter: v } })} unit="mm" />
+              <Field label="Sprue placement" value={castingCase.tree.spruePlacement} onChange={(v) => update({ tree: { ...castingCase.tree, spruePlacement: v } })} placeholder="e.g. single, opposed, central, side feed" />
               <Field label="Branch / feed diameter" value={castingCase.tree.branchDiameter} onChange={(v) => update({ tree: { ...castingCase.tree, branchDiameter: v } })} unit="mm" />
               <div className="space-y-2 sm:col-span-2">
                 <Label className="text-xs font-medium text-slate-600">Was the sprue reduced or restricted where it joined the component?</Label>
@@ -311,7 +313,7 @@ export function ReworkedSetupStep({ castingCase, update, onNext }: Props) {
                 <p className="text-xs text-slate-500">For example, a 5 mm sprue that has been pinched down to 3 mm at the component is not a 5 mm feed at the entry point.</p>
               </div>
               <Field label="Gate dimensions" value={castingCase.tree.gateDimensions} onChange={(v) => update({ tree: { ...castingCase.tree, gateDimensions: v } })} />
-              <Field label="Gate / feed connection count" value={castingCase.tree.gateCount} onChange={(v) => update({ tree: { ...castingCase.tree, gateCount: v } })} />
+              <Field label="Gate count" value={castingCase.tree.gateCount} onChange={(v) => update({ tree: { ...castingCase.tree, gateCount: v } })} />
               <Field label="Gate position" value={castingCase.tree.gatePosition} onChange={(v) => update({ tree: { ...castingCase.tree, gatePosition: v } })} />
             </div>
           </div>
