@@ -48,9 +48,10 @@ export interface Alloy {
   composition: string;
   supplier: string;
   batch: string;
-  chargeType: "new" | "recycled" | "mixed";
+  chargeType: "new" | "recycled" | "mixed" | "scrap-only";
   chargeMass: string;
   meltTemp: string;
+  referenceMeltTemp?: string;
   superheatDuration: string;
   measurementConfidence: MeasurementConfidence;
   contaminationConcerns: string;
@@ -92,6 +93,8 @@ export interface Tree {
   componentCount: string;
   componentMass: string;
   sprueDiameter: string;
+  ringDiameter?: string;
+  ringThickness?: string;
   sprueCount: string;
   spruePlacement: string;
   sprueShape: SprueShape;
@@ -106,6 +109,7 @@ export interface Tree {
   positioning: "favourable" | "unfavourable" | "unknown";
   venting: string;
   standardisedPattern: boolean;
+  itemProfile?: "cool-heavy" | "standard" | "fine" | "unknown";
 }
 
 export interface Defect {
