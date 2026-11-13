@@ -86,6 +86,10 @@ export function ReworkedSetupStep({ castingCase, update, onNext }: Props) {
     update({ investment: { ...investment, ...patch } });
 
   const modified = investment.formulationModified || investment.additiveUsed;
+  const alloyText = alloy.composition.toLowerCase();
+  const alloyConstant = alloyText.includes("ptco") ? 0.65 : alloyText.includes("white") && alloyText.includes("palladium") ? 0.52 : alloyText.includes("yellow") ? 0.50 : (alloyText.includes("9ct") || alloyText.includes("9 carat")) ? 0.42 : null;
+  const ringD = Number(castingCase.tree.ringDiameter), ringT = Number(castingCase.tree.ringThickness);
+  const calculatedSprue = alloyConstant !== null && ringD > 0 && ringT > 0 ? (alloyConstant * Math.sqrt(ringD * ringT)).toFixed(2) : null;
 
   const water = parseFloat(investment.waterFraction);
   const expansion = parseFloat(investment.expansionFluidFraction);
@@ -146,12 +150,14 @@ export function ReworkedSetupStep({ castingCase, update, onNext }: Props) {
                 <SelectContent>
                   <SelectItem value="new">New metal</SelectItem>
                   <SelectItem value="recycled">Recycled</SelectItem>
-                  <SelectItem value="mixed">Mixed charge</SelectItem>
+                  <SelectItem value="mixed">Mixed charge (50% fresh / 50% scrap)</SelectItem>
+                  <SelectItem value="scrap-only">Scrap only</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <Field label="Charge mass" value={alloy.chargeMass} onChange={(v) => setAlloy({ chargeMass: v })} unit="g" />
             <Field label="Casting temperature" value={alloy.meltTemp} onChange={(v) => setAlloy({ meltTemp: v })} unit="°C" />
+            <Field label="Data-sheet target temperature" value={alloy.referenceMeltTemp || ""} onChange={(v) => setAlloy({ referenceMeltTemp: v })} unit="°C" placeholder="Enter alloy data-sheet target" />
             <Field label="Time at casting temperature" value={alloy.superheatDuration} onChange={(v) => setAlloy({ superheatDuration: v })} unit="s" />
             <div className="space-y-1.5 sm:col-span-2">
               <Label className="text-xs font-medium text-slate-600">Measurement confidence</Label>
@@ -190,11 +196,13 @@ export function ReworkedSetupStep({ castingCase, update, onNext }: Props) {
             <Field label="Liquid-to-powder ratio" value={investment.liquidRatio} onChange={(v) => setInv({ liquidRatio: v })} placeholder="e.g. 22:100" />
             <Field label="Water temperature" value={investment.waterTemp} onChange={(v) => setInv({ waterTemp: v })} unit="°C" />
             <Field label="Powder temperature" value={investment.powderTemp} onChange={(v) => setInv({ powderTemp: v })} unit="°C" />
+            <p className="text-xs text-slate-500 sm:col-span-2">Preferred powder temperature: 17–20°C. Above 20°C is flagged for review.</p>
             <Field label="Mixing equipment" value={investment.mixingEquipment} onChange={(v) => setInv({ mixingEquipment: v })} />
             <Field label="Mixing time" value={investment.mixingTime} onChange={(v) => setInv({ mixingTime: v })} unit="min" />
             <Field label="Vacuum procedure" value={investment.vacuumProcedure} onChange={(v) => setInv({ vacuumProcedure: v })} />
             <Field label="Setting time" value={investment.settingTime} onChange={(v) => setInv({ settingTime: v })} unit="min" />
             <Field label="Burnout schedule" value={investment.burnoutSchedule} onChange={(v) => setInv({ burnoutSchedule: v })} placeholder="e.g. 150→730°C over 6h" />
+            <div className="space-y-1.5"><Label className="text-xs font-medium text-slate-600">Component / tree profile</Label><Select value={castingCase.tree.itemProfile || "unknown"} onValueChange={(v) => update({ tree: { ...castingCase.tree, itemProfile: v as CastingCase["tree"]["itemProfile"] } })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="cool-heavy">Cool tree — heavy plain items</SelectItem><SelectItem value="standard">Standard items</SelectItem><SelectItem value="fine">Fine items</SelectItem><SelectItem value="unknown">Not specified</SelectItem></SelectContent></Select></div>
             <Field label="Flask temperature at casting" value={investment.flaskTemp} onChange={(v) => setInv({ flaskTemp: v })} unit="°C" />
             <Field label="Flask temp measurement" value={investment.flaskTempMethod} onChange={(v) => setInv({ flaskTempMethod: v })} placeholder="Thermocouple / pyrometer" />
             <Field label="Permeability notes" value={investment.permeabilityNotes} onChange={(v) => setInv({ permeabilityNotes: v })} />
@@ -296,7 +304,9 @@ export function ReworkedSetupStep({ castingCase, update, onNext }: Props) {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Number of sprues" value={castingCase.tree.sprueCount} onChange={(v) => update({ tree: { ...castingCase.tree, sprueCount: v } })} placeholder="e.g. 1, 2, 3" />
-              <Field label="Main sprue diameter" value={castingCase.tree.sprueDiameter} onChange={(v) => update({ tree: { ...castingCase.tree, sprueDiameter: v } })} unit="mm" />
+              <Field label="Main sprue diameter (actual)" value={castingCase.tree.sprueDiameter} onChange={(v) => update({ tree: { ...castingCase.tree, sprueDiameter: v } })} unit="mm" />
+              <Field label="Ring diameter for calculator" value={castingCase.tree.ringDiameter || ""} onChange={(v) => update({ tree: { ...castingCase.tree, ringDiameter: v } })} unit="mm" />
+              <Field label="Ring thickness for calculator" value={castingCase.tree.ringThickness || ""} onChange={(v) => update({ tree: { ...castingCase.tree, ringThickness: v } })} unit="mm" /><div className="rounded-lg border border-amber-200 bg-amber-50 p-3 sm:col-span-2"><p className="text-xs font-semibold text-amber-900">Sprue diameter calculator — approximate</p><p className="mt-1 text-xs text-amber-900/80">Workshop Hub formula: k × √(ring diameter × ring thickness).</p><p className="mt-1 text-sm font-semibold text-amber-900">{calculatedSprue ? `Calculated reference: ${calculatedSprue} mm (k = ${alloyConstant})` : "Enter supported alloy composition and ring dimensions. PtRu has no defined calculator constant."}</p><p className="mt-1 text-xs text-amber-900/70">Sizing reference only; not a guarantee of adequate feeding.</p></div>
               <Field label="Sprue placement" value={castingCase.tree.spruePlacement} onChange={(v) => update({ tree: { ...castingCase.tree, spruePlacement: v } })} placeholder="e.g. single, opposed, central, side feed" />
               <Field label="Branch / feed diameter" value={castingCase.tree.branchDiameter} onChange={(v) => update({ tree: { ...castingCase.tree, branchDiameter: v } })} unit="mm" />
               <div className="space-y-2 sm:col-span-2">
