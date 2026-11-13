@@ -43,7 +43,7 @@ function Stat({
 }
 
 export function ParametersStep({ castingCase, update, onBack, onNext }: Props) {
-  const { alloy, investment, setup } = castingCase;
+  const { alloy, investment } = castingCase;
   const setAlloy = (patch: Partial<CastingCase["alloy"]>) => update({ alloy: { ...alloy, ...patch } });
   const setInv = (patch: Partial<CastingCase["investment"]>) =>
     update({ investment: { ...investment, ...patch } });
@@ -157,9 +157,6 @@ export function ParametersStep({ castingCase, update, onBack, onNext }: Props) {
             <Badge variant="outline" className={confidenceTone}>
               {alloy.measurementConfidence}
             </Badge>
-            <span className="text-xs text-slate-400">
-              {setup.tempSystem || "No temperature system recorded"}
-            </span>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={onBack}>
