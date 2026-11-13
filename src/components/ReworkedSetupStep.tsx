@@ -87,7 +87,7 @@ export function ReworkedSetupStep({ castingCase, update, onNext }: Props) {
 
   const modified = investment.formulationModified || investment.additiveUsed;
   const alloyText = alloy.composition.toLowerCase();
-  const alloyConstant = alloyText.includes("ptco") ? 0.65 : alloyText.includes("white") && alloyText.includes("palladium") ? 0.52 : alloyText.includes("yellow") ? 0.50 : alloy.metal === "gold" ? 0.42 : null;
+  const alloyConstant = alloyText.includes("ptco") ? 0.65 : alloyText.includes("white") && alloyText.includes("palladium") ? 0.52 : alloyText.includes("yellow") ? 0.50 : (alloyText.includes("9ct") || alloyText.includes("9 carat")) ? 0.42 : null;
   const ringD = Number(castingCase.tree.ringDiameter), ringT = Number(castingCase.tree.ringThickness);
   const calculatedSprue = alloyConstant !== null && ringD > 0 && ringT > 0 ? (alloyConstant * Math.sqrt(ringD * ringT)).toFixed(2) : null;
 
