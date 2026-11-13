@@ -75,7 +75,6 @@ function Field({
         {unit && <span className="ml-1 text-slate-400">({unit})</span>}
       </Label>
       <Input value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
-      </div>
     </div>
   );
 }
@@ -359,6 +358,7 @@ export function LegacySetupStep({ castingCase, update, onNext, onSwitchToReworke
         <Button onClick={onNext} className="w-full bg-teal-700 hover:bg-teal-800">
           Continue to parameters <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
+      </div>
       </div>
     </div>
   );
