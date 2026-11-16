@@ -157,7 +157,7 @@ export function ReworkedSetupStep({ castingCase, update, onNext }: Props) {
             </div>
             <Field label="Charge mass" value={alloy.chargeMass} onChange={(v) => setAlloy({ chargeMass: v })} unit="g" />
             <Field label="Casting temperature" value={alloy.meltTemp} onChange={(v) => setAlloy({ meltTemp: v })} unit="°C" />
-            <Field label="Data-sheet target temperature" value={alloy.referenceMeltTemp || ""} onChange={(v) => setAlloy({ referenceMeltTemp: v })} unit="°C" placeholder="Enter alloy data-sheet target" />
+            <Field label="Expected normal casting temperature / data-sheet range" value={alloy.referenceMeltTemp || ""} onChange={(v) => setAlloy({ referenceMeltTemp: v })} unit="°C" placeholder="e.g. approx. 1000–1120" />
             <Field label="Time at casting temperature" value={alloy.superheatDuration} onChange={(v) => setAlloy({ superheatDuration: v })} unit="s" />
             <div className="space-y-1.5 sm:col-span-2">
               <Label className="text-xs font-medium text-slate-600">Measurement confidence</Label>

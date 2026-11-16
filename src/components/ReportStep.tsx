@@ -61,6 +61,19 @@ export function ReportStep({ castingCase, onBack }: Props) {
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       <div className="space-y-4 lg:col-span-2">
+        {processRisks.some((risk) => risk.critical) && (
+          <Card role="alert" className="border-rose-300 bg-rose-50 shadow-sm print:break-inside-avoid">
+            <CardContent className="flex gap-3 p-5">
+              <AlertTriangle className="h-6 w-6 shrink-0 text-rose-700" />
+              <div>
+                <p className="text-sm font-bold text-rose-900">Critical process inconsistency — check before casting</p>
+                {processRisks.filter((risk) => risk.critical).map((risk, index) => (
+                  <p key={index} className="mt-1 text-sm text-rose-900">{risk.detail}</p>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
         <AlignmentChart castingCase={castingCase} /><Card className="border-amber-200 shadow-sm print:break-inside-avoid"><CardHeader className="border-b border-amber-100 bg-amber-50/60"><CardTitle className="text-base font-semibold text-amber-950">Process risk review</CardTitle><CardDescription>Technical risk weightings (1–10), not probabilities or diagnostic confidence percentages. Review each flag in context.</CardDescription></CardHeader><CardContent className="p-5">{processRisks.length===0?<p className="text-sm text-slate-500">No defined risk triggers identified. Missing data is not proof of low risk.</p>:<div className="space-y-3">{processRisks.map((r,i)=><div key={i} className="flex items-start justify-between gap-4 border-b border-slate-100 pb-3 last:border-0"><div><p className="text-sm font-semibold text-slate-800">{r.factor}</p><p className="text-xs text-slate-500">{r.detail}</p></div><span className="shrink-0 rounded-md bg-amber-100 px-2 py-1 text-xs font-bold text-amber-900">{r.weight.toFixed(1)}/10</span></div>)}</div>}</CardContent></Card>
 
         <Card className="border-slate-200 shadow-sm print:break-inside-avoid">
